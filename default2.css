@@ -1,0 +1,148 @@
+
+body 
+{
+    text-align: center;
+    min-width: 710px;
+    font-family: Arial;
+	font-size: 12px;
+	background-color:#FFFFFF;
+}
+a:visited
+{
+    color:Blue;
+}
+hr
+{
+	clear:left;
+	float:left;
+}
+table
+{
+	font-size:12px;
+}
+#page 
+{
+    text-align: left;
+    width: 710px;
+    margin-left: auto;
+    margin-right: auto;
+}
+#header
+{
+    /* Border for debugging
+    border:solid 1px Black;  */
+    width:710px;
+    margin-left:1px;
+    margin-right:1px;
+}
+#headerImage
+{
+	float:left;
+}
+#headerText
+{
+	float:left;
+	text-align:left;
+	width:330px;
+}
+#headerWebAddress
+{
+	font-weight:bold;
+	font-size:12px;
+	color:#cc3333;
+	width:310px;
+}
+#headerAngie
+{
+    float:left;
+    width:110px;
+}
+#linkBox
+{
+	float:left;
+	text-align:left;
+	padding:10px;
+	border: solid 1px #DD7777;
+	width:165px;
+	font-size:11px;	
+	height:330px;
+}
+#contentBox
+{
+    float:right;
+    width:510px;
+    padding-left:10px;
+}
+#contentBox2
+{
+    text-align:center;
+    width:710px;
+    margin-left: auto;
+    margin-right: auto;
+}
+#contentBox3
+{
+    clear:left;
+    text-align:center;
+    width:1000px;
+}
+#nameStyle
+{
+	font-weight:bold;
+	font-size:12px;
+	color:#CC3333;
+}
+#heading
+{
+	font-weight:bold;
+	font-style:italic;
+	font-size:16px;
+	color:#CC3333;
+}
+#heading2
+{
+    font-weight:bold;
+    font-size:18px;
+    font-style:italic;
+	color:#CC3333;
+}
+#paragraphHeading
+{
+	font-weight:bold;
+	font-size:14px;	
+}
+#paragraphAngie
+{
+	font-size:11px;
+}
+#smallTextBoxLeft
+{
+	padding-right:10px;
+	float:left;
+}
+#registerTextBlock
+{
+	font-weight:bold;
+	color:#CC3333;
+	font-family:Verdana;
+	text-align:center;
+}
+#list
+{
+	list-style-position:inside;
+}
+#footer_box
+{
+	padding-top:15px;
+	padding-left:10px;
+	width:710px;
+}
+#comments
+{
+    float:left;
+}
+#Form1
+{
+    position:absolute;
+    top:370px;
+}

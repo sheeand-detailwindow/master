@@ -1,0 +1,185 @@
+﻿
+body 
+{
+    text-align: center;
+    min-width: 1050px;
+	background-color:#FFFFFF;
+}
+a:visited
+{
+    color:Blue;
+}
+hr
+{
+	clear:left;
+	float:left;
+}
+#page 
+{
+    width: 1050px;
+    height: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: Arial;
+	font-size: 12px;
+    text-align: left;
+}
+#header
+{
+    width:1048px; 
+    margin-left:1px; 
+    margin-right:1px; 
+    height:120px;
+}
+#headerContent
+{
+    width:895px;
+    margin-left:160px;
+}
+#headerImage
+{
+	float:left;
+}
+#headerText
+{
+	float:left;
+	text-align:left;
+	width:330px;
+}
+#headerAngie
+{
+    float:left;
+    width:200px;
+    position:relative;
+    top:-30px;
+    margin-bottom:-35px;
+    text-align:center;
+}
+#linkBox
+{
+	float:left;
+	text-align:left;
+	padding:10px;
+	width:175px;
+	font-size:11px;	
+	/* height:325px; */
+}
+#wxForcastPanel
+{
+	float:left;
+	padding:10px;
+	width:140px;
+	font-size:10px;
+	color:Maroon;
+}
+#wxExtendedPanel
+{
+	float:right;
+	padding:10px;
+	width:140px;
+	font-size:10px;
+	color:Maroon;
+}
+#contentBoxOuterFrame
+{
+    /* float:right; */
+    float:left;
+    width:504px;
+    margin-left:10px;
+    border-width:8px;
+    border-style:solid;
+    border-color:#cc6E5E;
+}
+#contentBoxInnerFrame
+{
+    width:484px;
+    padding:4px;
+    border-width:4px;
+    border-style:solid;
+    border-color:#bbbbbb;
+    margin:2px;
+}
+#contentBox2
+{
+    float:left;
+    text-align:center;
+    width:510px;
+	height:425px;
+}
+#contentBox3
+{
+    float:left;
+    width:500px;
+    padding-left:20px;
+    border-left-color:#cc6666;
+    border-left-width:4px;
+    border-left-style:solid;
+}
+.redText
+{
+	font-size:12px;
+	color:Maroon;
+}
+#heading
+{
+	font-weight:bold;
+	font-style:italic;
+	font-size:16px;
+	color:#CC3333;
+}
+.heading2
+{
+    font-weight:bold;
+    font-size:20px;
+    font-style:italic;
+	color:#CC3333;
+}
+#smallTextBoxLeft
+{
+	padding-right:10px;
+	float:left;
+}
+#registerTextBlock
+{
+	font-weight:bold;
+	color:#CC3333;
+	font-family:Verdana;
+	text-align:center;
+}
+#list
+{
+	list-style-position:inside;
+}
+#comments
+{
+    float:left;
+}
+.LoginStrengthIndicatorText
+{
+    background-color:Gray;
+    color:White;
+    font-size:x-small;
+    font-style:italic;
+    padding:2px 3px 2px 3px;
+}
+.paragraphHeading
+{
+    font-weight:bold;
+}
+.noBorder
+{
+    border:0px;
+}
+#footer_box
+{
+    clear:both; 
+    height:160px; 
+    padding-top:15px; 
+    padding-left:10px; 
+    width:1050px;
+}
+#footerContent
+{
+    width:895px;
+    margin-left:160px;
+}

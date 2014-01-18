@@ -1,0 +1,113 @@
+﻿
+body 
+{
+    text-align: center;
+    min-width: 1400px;
+    font-family: Arial;
+	font-size: 12px;
+	background-color:#FFFFFF;
+}
+#page 
+{
+    text-align: left;
+    width: 1400px;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+hr
+{
+	clear:left;
+	float:left;
+}
+#header
+{
+    width:710px;
+    margin-left:1px;
+    margin-right:1px;
+}
+#headerImage
+{
+	float:left;
+}
+#headerText
+{
+	float:left;
+	text-align:left;
+	width:330px;
+}
+#headerWebAddress
+{
+	font-weight:bold;
+	font-size:12px;
+	color:#cc3333;
+	width:310px;
+}
+#headerAngie
+{
+    display:none;
+}
+.redText
+{
+	font-weight:bold;
+	font-size:12px;
+	color:#CC3333;
+}
+#heading
+{
+	font-weight:bold;
+	font-style:italic;
+	font-size:16px;
+	color:#CC3333;
+}
+.heading2
+{
+    font-weight:bold;
+    font-size:18px;
+    font-style:italic;
+	color:#CC3333;
+}
+#paragraphHeading
+{
+	font-weight:bold;
+	font-size:14px;	
+}
+#paragraphAngie
+{
+	font-size:11px;
+}
+#smallTextBoxLeft
+{
+	padding-right:10px;
+	float:left;
+}
+#registerTextBlock
+{
+	font-weight:bold;
+	color:#CC3333;
+	font-family:Verdana;
+	text-align:center;
+}
+#list
+{
+	list-style-position:inside;
+}
+#footer_box
+{
+	padding-top:15px;
+	padding-left:10px;
+	width:710px;
+}
+
+#comments
+{
+    float:left;
+}
+.LoginStrengthIndicatorText
+{
+    background-color:Gray;
+    color:White;
+    font-size:x-small;
+    font-style:italic;
+    padding:2px 3px 2px 3px;
+}

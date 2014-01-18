@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /data/detail.mdb
+Disallow: linksPublic.ascx
+Disallow: linksLogin.ascx
+Disallow: linksMember.ascx

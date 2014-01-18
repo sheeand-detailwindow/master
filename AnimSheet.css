@@ -1,0 +1,41 @@
+.demoarea {
+	padding:20px;
+	background:#FFF url(images/demotop.png) no-repeat left top;
+}
+
+.demoarea p 
+{
+	padding:5px;
+}
+
+.demoheading {
+	padding-bottom:20px;
+	color:#5377A9;
+	font-family:Arial, Sans-Serif;
+	font-weight:bold;
+	font-size:1.5em;
+}
+
+.demobottom {
+	height:8px;
+	background:#FFF url(images/demobottom.png) no-repeat left bottom;
+}
+
+wireFrame {
+display: 	none; 
+overflow: hidden; 
+z-index: 2; 
+background-color: #FFFFFF; 
+border: solid 1px #D0D0D0;
+
+}
+
+CloseButtonStyle {
+background-color: #666666; 
+color: #FFFFFF; 
+text-align: center; 
+font-weight: bold; 
+text-decoration: none; 
+border: outset thin #FFFFFF; 
+padding: 5px;
+}

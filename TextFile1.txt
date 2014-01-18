@@ -1,0 +1,43 @@
+﻿<asp:ScriptManager ID="ScriptManager1" runat="server">
+</asp:ScriptManager>
+   <div class="demoarea">
+   Any HTML content that you want. 
+   <br /><br />
+   <!-- Button used to launch the animation -->
+       <asp:Button ID="btnInfo" runat="server" 
+               OnClientClick="return false;" 
+               Text="Click Here"/>
+   <!-- "Wire frame" div used to transition from the button to the info panel -->
+   <div id="flyout" class="wireFrame"></div>
+        
+   <!-- Info panel to be displayed as a flyout when the button is clicked -->
+   <div id="info" style="display: none; width: 250px; z-index: 2; opacity: 0; filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0); font-size: 12px; border: solid 1px #CCCCCC; background-color: #FFFFFF; padding: 5px;">
+      <div id="btnCloseParent" style="float: right; opacity: 100; filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100);">
+          <asp:LinkButton ID="btnClose" runat="server" 
+                         OnClientClick="return false;" 
+                         Text="X" ToolTip="Close"
+                         Style="background-color: #666666; color: #FFFFFF; text-align: center; font-weight: bold; text-decoration: none; border: outset thin #FFFFFF; padding: 5px;" />
+      </div>
+      Once you get the general idea of the animation's markup, you'll want to play a bit.  All of
+      the animations are created from simple, reusable building blocks that you can compose together.
+      Before long you'll be creating dazzling visuals.  By grouping steps together and specifying
+      them to be run either in sequence or in parallel, you'll achieve almost anything you can
+      imagine, without writing a single line of code!     
+    </div>
+
+   <script type="text/javascript" language="javascript">
+      // Move an element directly on top of another element (and optionally
+      // make it the same size)
+      function Cover(bottom, top, ignoreSize) {
+         var location = Sys.UI.DomElement.getLocation(bottom);
+         top.style.position = 'absolute';
+         top.style.top = location.y + 'px';
+         top.style.left = location.x + 'px';
+         if (!ignoreSize) {
+             top.style.height = bottom.offsetHeight + 'px';
+             top.style.width = bottom.offsetWidth + 'px';
+             }
+         }
+      </script>
+        
+          
