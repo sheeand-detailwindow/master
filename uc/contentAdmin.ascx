@@ -1,4 +1,12 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="True" CodeBehind="contentAdmin.ascx.cs" Inherits="detailwindow.contentAdmin" %>
+    <style type="text/css">
+        .auto-style1 {
+            width: 100%;
+        }
+        .auto-style2 {
+            width: 300px;
+        }
+    </style>
     <span id="header3" class="heading2">Customer List</span><br /><br />
 This is a complete list of customers who use (or have used) the web site.<br />
 The customers who most recently visited the web site are at the top of the list.<br /><br /><br />
@@ -7,8 +15,20 @@ THINGS YOU CAN DO:<br />
         <li>Click on a column heading to sort the list (or reverse the sort order) by that column.</li>
         <li>Click Delete to permanently delete that customer from the database. (If the customer returns, he or she will need to register again.)</li>
         <li>You can copy and paste the list into an Excel spreadsheet.</li></ul>
-    <br /><br />
-        <asp:Button ID="btnHome1" runat="server" OnClick="btnHome_Click" Text="Return to home page" />&nbsp;&nbsp;&nbsp;&nbsp;
+    <br />
+<table class="auto-style1">
+    <tr>
+        <td class="auto-style2">
+        <asp:Button ID="btnHome1" runat="server" OnClick="btnHome_Click" Text="Return to home page" /></td>
+        <td class="auto-style2">&nbsp;</td>
+        <td class="auto-style2">
+            <asp:Button ID="btnEmailService" runat="server" Text="Email Console" />
+        </td>
+    </tr>
+</table>
+<br />
+<asp:MultiView ID="MultiView1" runat="server" ActiveViewIndex="0">
+    <asp:View ID="View1" runat="server">
         <br /><br />
     <div class="heading2">Not receiving reminders:</div>
     <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" 
@@ -166,4 +186,9 @@ THINGS YOU CAN DO:<br />
     </asp:SqlDataSource>
     <br />&nbsp;
     <asp:Button ID="btnHome" runat="server" OnClick="btnHome_Click" Text="Return to home page" />
+    </asp:View>
+    <asp:View ID="View2" runat="server">
+
+    </asp:View>
+</asp:MultiView>
 
