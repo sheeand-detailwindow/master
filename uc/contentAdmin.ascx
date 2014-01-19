@@ -192,3 +192,186 @@ THINGS YOU CAN DO:<br />
     </asp:View>
 </asp:MultiView>
 
+<script>
+
+    // Types: Reminder, JanFeb, March, July
+    // Renditions: Live, WebmasterTest, AdministratorTest
+
+    function SendEmail(type, rendition) {
+        switch (rendition) {
+            case 'WebmasterTest':
+                switch (type) {
+                    case 'Reminder':
+                        $("#lblTestReminderEmailToWebmaster").text('Email in progress')
+                        break;
+                    case 'JanFeb':
+                        $("#lblTestJanFebEmailToWebmaster").text('Email in progress')
+                        break;
+                    case 'March':
+                        $("#lblTestMarchEmailToWebmaster").text('Email in progress')
+                        break;
+                    case 'July':
+                        $("#lblTestJulyEmailToWebmaster").text('Email in progress')
+                        break;
+                }
+                break;
+            case 'AdministratorTest':
+                switch (type) {
+                    case 'Reminder':
+                        $("#lblTestReminderEmailToAdministrator").text('Email in progress')
+                        break;
+                    case 'JanFeb':
+                        $("#lblTestJanFebEmailToAdministrator").text('Email in progress')
+                        break;
+                    case 'March':
+                        $("#lblTestMarchEmailToAdministrator").text('Email in progress')
+                        break;
+                    case 'July':
+                        $("#lblTestJulyEmailToAdministrator").text('Email in progress')
+                        break;
+                }
+                break;
+            case 'Live':
+                var r = confirm("You are about to send hundreds of emails! DO NOT close this browser window until all emails have been sent. Are you sure you want to do this?");
+                if (r == false) { return; }
+                else {
+                    switch (type) {
+                        case 'Reminder':
+                            $("#lblReminderEmails").text('Email in progress')
+                            break;
+                        case 'JanFeb':
+                            $("#lblJanFebEmails").text('Email in progress')
+                            break;
+                        case 'March':
+                            $("#lblMarchEmails").text('Email in progress')
+                            break;
+                        case 'July':
+                            $("#lblJulyEmails").text('Email in progress')
+                            break;
+                    }
+                }
+        }
+        var postData = {
+            Type: type,
+            Rendition: rendition,
+            Row: "1"
+        }
+        $.ajax({
+            type: "POST",
+            url: 'http://www.detailwindow.com/api/EmailService.asmx/SendEmail',
+            data: JSON.stringify(postData),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (obj) {
+                var msg = obj.d[0];
+                if (msg.indexOf("EmailApi") != -1) {
+                    $("#lblErrorMessage").text(msg)
+                }
+                else {
+                    switch (rendition) {
+                        case 'WebmasterTest':
+                            switch (type) {
+                                case 'Reminder':
+                                    $("#lblTestReminderEmailToWebmaster").text(msg)
+                                    break;
+                                case 'JanFeb':
+                                    $("#lblTestJanFebEmailToWebmaster").text(msg)
+                                    break;
+                                case 'March':
+                                    $("#lblTestMarchEmailToWebmaster").text(msg)
+                                    break;
+                                case 'July':
+                                    $("#lblTestJulyEmailToWebmaster").text(msg)
+                                    break;
+                            }
+                            break;
+                        case 'AdministratorTest':
+                            switch (type) {
+                                case 'Reminder':
+                                    $("#lblTestReminderEmailToAdministrator").text(msg)
+                                    break;
+                                case 'JanFeb':
+                                    $("#lblTestJanFebEmailToAdministrator").text(msg)
+                                    break;
+                                case 'March':
+                                    $("#lblTestJanFebEmailToAdministrator").text(msg)
+                                    break;
+                                case 'July':
+                                    $("#lblTestJulyEmailToAdministrator").text(msg)
+                                    break;
+                            }
+                        case 'Live':
+                            switch (type) {
+                                case 'Reminder':
+                                    $("#lblReminderEmails").text(msg)
+                                    break;
+                                case 'JanFeb':
+                                    $("#lblJanFebEmails").text(msg)
+                                    break;
+                                case 'March':
+                                    $("#lblMarchEmails").text(msg)
+                                    break;
+                                case 'July':
+                                    $("#lblJulyEmails").text(msg)
+                                    break;
+                            }
+                            if (msg.indexOf("Done") == -1) {
+                                var row = obj.d[1];
+
+                                // Do the next row
+                                SendAnotherEmail(type, rendition, row);
+                            }
+                            break;
+                    }
+                }
+            },
+            error: function (obj) {
+                var msg = obj.d[1];
+                $("#lblErrorMessage").text(msg)
+            }
+        });
+    }
+
+    function SendAnotherEmail(type, rendition, row) {
+        var postData = {
+            Type: type,
+            Rendition: rendition,
+            Row: row
+        }
+        $.ajax({
+            type: "POST",
+            url: 'http://www.detailwindow.com/api/EmailService.asmx/SendEmail',
+            data: JSON.stringify(postData),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (obj) {
+                var msg = obj.d[0];
+                if (msg.indexOf("EmailApi") != -1) {
+                    $("#lblErrorMessage").text(msg)
+                }
+                else {
+                    switch (type) {
+                        case 'JanFeb':
+                            $("#lblJanFebEmails").text(msg)
+                            break;
+                        case 'March':
+                            $("#lblMarchEmails").text(msg)
+                            break;
+                        case 'July':
+                            $("#lblJulyEmails").text(msg)
+                            break;
+                    }
+                    if (msg.indexOf("***Done***") == -1) {
+                        var row = obj.d[1];
+                        SendAnotherEmail(type, rendition, row);
+                    }
+                }
+            },
+            error: function (obj) {
+                var msg = obj.d[1];
+                $("#lblErrorMessage").text(msg)
+            }
+        });
+    }
+
+</script>
