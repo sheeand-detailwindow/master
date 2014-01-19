@@ -2,7 +2,7 @@
 
 <div id="wxForcastPanel">
 </div>
-<div id="wxExtendedPanel">
+<div ID="wxExtendedPanel" runat="server">
 <div style="font-size:12px;">For your scheduling convenience,<br />
 here's your local daytime forecast:<br /></div>
 <p><asp:Label ID="lblFirstDayPeriod" runat="server"></asp:Label>
