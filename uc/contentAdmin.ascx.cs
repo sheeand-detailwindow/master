@@ -17,10 +17,7 @@ namespace detailwindow
         {
 
         }
-        protected void btnHome_Click(object sender, EventArgs e)
-        {
-            Response.Redirect("default2.aspx");
-        }
+
         public string Path
         {
             get
@@ -28,6 +25,11 @@ namespace detailwindow
                 string path = String.Concat("http://", HttpContext.Current.Request.Url.Host, "/EmailService.asmx");
                 return path;
             }
+        }
+
+        protected void btnHome_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("default2.aspx");
         }
     }
 }

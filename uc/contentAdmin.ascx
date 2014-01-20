@@ -1,7 +1,7 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="True" CodeBehind="contentAdmin.ascx.cs" Inherits="detailwindow.contentAdmin" %>
     <style type="text/css">
         .auto-style1 {
-            width: 1120px;
+            width: 1200px;
         }
         .consoleLink {
             height: 20px;
@@ -12,31 +12,63 @@
             font-weight: bold;
             font-size: 16px;
         }
+        .auto-style3 {
+            width: 300px;
+        }
+        .auto-style4 {
+            height: 50px;
+        }
    </style>
 
 
 <asp:MultiView ID="MultiView1" runat="server" ActiveViewIndex="0">
 
+    <asp:View ID="View0" runat="server">
+    <span id="header4" class="heading2">Administrator Access</span><br /><br />
+            <table class="auto-style1">
+                <tr>
+                    <td colspan="3" class="auto-style4">
+                        </td>
+                </tr>
+                <tr>
+                    <td class="auto-style3">
+                        <asp:Button ID="btnHome1" runat="server" OnClick="btnHome_Click" Text="Return to home page" />
+                    </td>
+                    <td class="auto-style3">
+                        <asp:Button ID="btnList" runat="server" commandargument="View1" commandname="SwitchViewByID" Text="Customer List" />
+                    </td>
+                    <td class="auto-style3">
+                        <asp:Button ID="btnEmail" runat="server" commandargument="View2" commandname="SwitchViewByID" Text="Email Console" />
+                    </td>
+                </tr>
+            </table>
+    </asp:View>
+
 <asp:View ID="View1" runat="server">
 
 <span id="header3" class="heading2">Customer List</span><br /><br />
+            <table class="auto-style1">
+                <tr>
+                    <td colspan="3" class="auto-style4">
+                        </td>
+                </tr>
+                <tr>
+                    <td class="auto-style3">
+                        <asp:Button ID="Button1" runat="server" OnClick="btnHome_Click" Text="Return to home page" />
+                    </td>
+                    <td class="auto-style3">
+                        <asp:Button ID="Button3" runat="server" commandargument="View2" commandname="SwitchViewByID" Text="Email Console" />
+                    </td>
+                </tr>
+            </table>
 This is a complete list of customers who use (or have used) the web site.<br />
 The customers who most recently visited the web site are at the top of the list.<br /><br /><br />
 THINGS YOU CAN DO:<br />
     <ul>
         <li>Click on a column heading to sort the list (or reverse the sort order) by that column.</li>
         <li>Click Delete to permanently delete that customer from the database. (If the customer returns, he or she will need to register again.)</li>
-        <li>You can copy and paste the list into an Excel spreadsheet.</li></ul>
-    <br />
-<table class="auto-style1">
-    <tr>
-        <td class="auto-style2">
-        <asp:Button ID="btnHome1" runat="server" OnClick="btnHome_Click" Text="Return to home page" /></td>
-        <td class="auto-style2">
-            <asp:Button ID="Button1" runat="server" commandname="SwitchViewByID" commandargument="View2" Text="Email Console" />
-        </td>
-    </tr>
-</table>
+        <li>You can copy and paste the list into an Excel spreadsheet.</li>
+    </ul>
 <br />
         &nbsp;&nbsp;&nbsp;&nbsp;
         <br /><br />
@@ -213,14 +245,22 @@ THINGS YOU CAN DO:<br />
 <asp:View ID="View2" runat="server">
 
     <span class="heading2">Email Console</span><br /><br />
+    <table class="auto-style1">
+        <tr>
+            <td colspan="3" class="auto-style4">
+                </td>
+        </tr>
+        <tr>
+            <td class="auto-style3">
+                <asp:Button ID="Button6" runat="server" OnClick="btnHome_Click" Text="Return to home page" />
+            </td>
+            <td class="auto-style3">
+                <asp:Button ID="Button7" runat="server" commandargument="View1" commandname="SwitchViewByID" Text="Customer List" />
+            </td>
+        </tr>
+    </table>
 
 <table class="auto-style1">
-    <tr>
-        <td class="auto-style2"><asp:Button ID="Button4" runat="server" OnClick="btnHome_Click" Text="Return to Home Page" /></td>
-        <td class="auto-style2"><asp:Button ID="Button5" runat="server" commandname="SwitchViewByID" commandargument="View1" Text="Go To Customer List" /></td>
-        <td class="auto-style2"></td>
-        <td class="auto-style2"></td>
-    </tr>
     <tr>
         <td class="auto-style2" colspan="4">&nbsp;</td>
     </tr>
