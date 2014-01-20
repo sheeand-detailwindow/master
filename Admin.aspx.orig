@@ -9,7 +9,6 @@
 <head runat="server">
 	<title>Detail Window Cleaning - Administrator page</title>
 	<link href="admin.css" type="text/css" rel="stylesheet" />
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 </head>
 <body>
 	<div id="page">

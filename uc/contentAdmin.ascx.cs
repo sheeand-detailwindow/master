@@ -21,5 +21,13 @@ namespace detailwindow
         {
             Response.Redirect("default2.aspx");
         }
+        public string Path
+        {
+            get
+            {
+                string path = String.Concat("http://", HttpContext.Current.Request.Url.Host, "/EmailService.asmx");
+                return path;
+            }
+        }
     }
 }

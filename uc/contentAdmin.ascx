@@ -1,13 +1,25 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="True" CodeBehind="contentAdmin.ascx.cs" Inherits="detailwindow.contentAdmin" %>
     <style type="text/css">
         .auto-style1 {
-            width: 100%;
+            width: 1120px;
         }
-        .auto-style2 {
-            width: 300px;
+        .consoleLink {
+            height: 20px;
         }
-    </style>
-    <span id="header3" class="heading2">Customer List</span><br /><br />
+        .consoleLinkTitle {
+            width: 275px;
+            height: 30px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+   </style>
+
+
+<asp:MultiView ID="MultiView1" runat="server" ActiveViewIndex="0">
+
+<asp:View ID="View1" runat="server">
+
+<span id="header3" class="heading2">Customer List</span><br /><br />
 This is a complete list of customers who use (or have used) the web site.<br />
 The customers who most recently visited the web site are at the top of the list.<br /><br /><br />
 THINGS YOU CAN DO:<br />
@@ -20,15 +32,13 @@ THINGS YOU CAN DO:<br />
     <tr>
         <td class="auto-style2">
         <asp:Button ID="btnHome1" runat="server" OnClick="btnHome_Click" Text="Return to home page" /></td>
-        <td class="auto-style2">&nbsp;</td>
         <td class="auto-style2">
-            <asp:Button ID="btnEmailService" runat="server" Text="Email Console" />
+            <asp:Button ID="Button1" runat="server" commandname="SwitchViewByID" commandargument="View2" Text="Email Console" />
         </td>
     </tr>
 </table>
 <br />
-<asp:MultiView ID="MultiView1" runat="server" ActiveViewIndex="0">
-    <asp:View ID="View1" runat="server">
+        &nbsp;&nbsp;&nbsp;&nbsp;
         <br /><br />
     <div class="heading2">Not receiving reminders:</div>
     <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" 
@@ -72,6 +82,12 @@ THINGS YOU CAN DO:<br />
             <asp:TemplateField HeaderText="Most Recent Visit" SortExpression="LastLogin">
                 <ItemTemplate>
                     <%# Eval("LastLogin", "{0:MM/d/yyyy}") %>
+                </ItemTemplate>
+                <ItemStyle Width="100px"  />
+            </asp:TemplateField>
+             <asp:TemplateField HeaderText="Promo Sent" SortExpression="PromoSent">
+                <ItemTemplate>
+                    <%# Eval("PromoSent", "{0:MM/d/yyyy}") %>
                 </ItemTemplate>
                 <ItemStyle Width="100px"  />
             </asp:TemplateField>
@@ -156,6 +172,12 @@ THINGS YOU CAN DO:<br />
                 </ItemTemplate>
                 <ItemStyle Width="100px"  />
             </asp:TemplateField>
+             <asp:TemplateField HeaderText="Promo Sent" SortExpression="PromoSent">
+                <ItemTemplate>
+                    <%# Eval("PromoSent", "{0:MM/d/yyyy}") %>
+                </ItemTemplate>
+                <ItemStyle Width="100px"  />
+            </asp:TemplateField>
         </Columns>
         <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
         <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
@@ -168,7 +190,7 @@ THINGS YOU CAN DO:<br />
     <br />
     <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:detailConnectionString %>"
         ProviderName="<%$ ConnectionStrings:detailConnectionString.ProviderName %>"
-        SelectCommand="SELECT [NextReminder], [Recurrency], [Name], [LastName], [CompanyName], [Subdivision], [Address], [City], [Zip], [Email], [Phone1], [Phone2], [Phone3], [LastLogin], [ID] FROM [Customer] WHERE [ReminderOptOut] = NULL OR [ReminderOptOut] = FALSE ORDER BY [LastLogin] DESC" 
+        SelectCommand="SELECT [NextReminder], [Recurrency], [Name], [LastName], [CompanyName], [Subdivision], [Address], [City], [Zip], [Email], [Phone1], [Phone2], [Phone3], [LastLogin], [PromoSent], [ID] FROM [Customer] WHERE [ReminderOptOut] = NULL OR [ReminderOptOut] = FALSE ORDER BY [LastLogin] DESC" 
         DeleteCommand="DELETE FROM [Customer] WHERE [ID] = ?" 
         UpdateCommand="UPDATE [Customer] SET [NextReminder] = ?, [Recurrency] = ?  WHERE [ID] = ?">
         <DeleteParameters>
@@ -177,7 +199,7 @@ THINGS YOU CAN DO:<br />
     </asp:SqlDataSource>
     <asp:SqlDataSource ID="SqlDataSource2" runat="server" ConnectionString="<%$ ConnectionStrings:detailConnectionString %>"
         ProviderName="<%$ ConnectionStrings:detailConnectionString.ProviderName %>"
-        SelectCommand="SELECT [NextReminder], [Recurrency], [Name], [LastName], [CompanyName], [Subdivision], [Address], [City], [Zip], [Email], [Phone1], [Phone2], [Phone3], [LastLogin], [ID] FROM [Customer] WHERE [ReminderOptOut] = TRUE ORDER BY [LastLogin] DESC" 
+        SelectCommand="SELECT [NextReminder], [Recurrency], [Name], [LastName], [CompanyName], [Subdivision], [Address], [City], [Zip], [Email], [Phone1], [Phone2], [Phone3], [LastLogin], [PromoSent], [ID] FROM [Customer] WHERE [ReminderOptOut] = TRUE ORDER BY [LastLogin] DESC" 
         DeleteCommand="DELETE FROM [Customer] WHERE [ID] = ?" >
         <DeleteParameters>
             <asp:Parameter Name="ID" Type="Int32" />
@@ -186,13 +208,77 @@ THINGS YOU CAN DO:<br />
     </asp:SqlDataSource>
     <br />&nbsp;
     <asp:Button ID="btnHome" runat="server" OnClick="btnHome_Click" Text="Return to home page" />
-    </asp:View>
-    <asp:View ID="View2" runat="server">
 
-    </asp:View>
+</asp:View>
+<asp:View ID="View2" runat="server">
+
+    <span class="heading2">Email Console</span><br /><br />
+
+<table class="auto-style1">
+    <tr>
+        <td class="auto-style2"><asp:Button ID="Button4" runat="server" OnClick="btnHome_Click" Text="Return to Home Page" /></td>
+        <td class="auto-style2"><asp:Button ID="Button5" runat="server" commandname="SwitchViewByID" commandargument="View1" Text="Go To Customer List" /></td>
+        <td class="auto-style2"></td>
+        <td class="auto-style2"></td>
+    </tr>
+    <tr>
+        <td class="auto-style2" colspan="4">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="consoleLinkTitle">Reminders</td>
+        <td class="consoleLinkTitle">January-February Promotion</td>
+        <td class="consoleLinkTitle">March Promotion</td>
+        <td class="consoleLinkTitle">July Promotion</td>
+    </tr>
+    <tr>
+        <td class="consoleLink"><a id="lnkSendReminderEmailToWebmaster" href="#" onclick="SendEmail('Reminder', 'WebmasterTest')">Send a Test Email To Dave</a></td>
+        <td class="consoleLink"><a id="lnkSendJanFebEmailToWebmaster" href="#" onclick="SendEmail('JanFeb', 'WebmasterTest')">Send a Test Email To Dave</a></td>
+        <td class="consoleLink"><a id="lnkSendMarchEmailToWebmaster" href="#" onclick="SendEmail('March', 'WebmasterTest')">Send a Test Email To Dave</a></td>
+        <td class="consoleLink"><a id="lnkSendJulyEmailToWebmaster" href="#" onclick="SendEmail('July', 'WebmasterTest')">Send a Test Email To Dave</a></td>
+    </tr>
+    <tr>
+        <td class="consoleLink"><label id="lblTestReminderEmailToWebmaster"> </label></td>
+        <td class="consoleLink"><label id="lblTestJanFebEmailToWebmaster"> </label></td>
+        <td class="consoleLink"><label id="lblTestMarchEmailToWebmaster"> </label></td>
+        <td class="consoleLink"><label id="lblTestJulyEmailToWebmaster"> </label></td>
+
+    </tr>
+    <tr>
+        <td class="consoleLink"><a id="lnkSendReminderEmailToAdministrator" href="#" onclick="SendEmail('Reminder', 'AdministratorTest')">Send a Test Email To Janice</a></td>
+        <td class="consoleLink"><a id="lnkSendJanFebEmailToAdministrator" href="#" onclick="SendEmail('JanFeb', 'AdministratorTest')">Send a Test Email To Janice</a></td>
+        <td class="consoleLink"><a id="lnkSendMarchEmailToAdministrator" href="#" onclick="SendEmail('March', 'AdministratorTest')">Send a Test Email To Janice</a></td>
+        <td class="consoleLink"><a id="lnkSendJulyEmailToAdministrator" href="#" onclick="SendEmail('July', 'AdministratorTest')">Send a Test Email To Janice</a></td>
+    </tr>
+    <tr>
+        <td class="consoleLink"><label id="lblTestReminderEmailToAdministrator"> </label></td>
+        <td class="consoleLink"><label id="lblTestJanFebEmailToAdministrator"> </label></td>
+        <td class="consoleLink"><label id="lblTestMarchEmailToAdministrator"> </label></td>
+        <td class="consoleLink"><label id="lblTestJulyEmailToAdministrator"> </label></td>
+    </tr>
+    <tr>
+        <td class="consoleLink">&nbsp;</td>
+        <td class="consoleLink"><a id="lnkSendJanFebEmails" href="#" onclick="SendEmail('JanFeb', 'Live')">Send Emails To All Customers</a></td>
+        <td class="consoleLink"><a id="lnkSendMarchEmails" href="#" onclick="SendEmail('March', 'Live')">Send Emails To All Customers</a></td>
+        <td class="consoleLink"><a id="lnkSendJulyEmails" href="#" onclick="SendEmail('July', 'Live')">Send Emails To All Customers</a></td>
+    </tr>
+    <tr>
+        <td class="consoleLink">&nbsp;</td>
+        <td class="consoleLink"><label id="lblJanFebEmails" ></label></td>
+        <td class="consoleLink"><label id="lblMarchEmails"> </label></td>
+        <td class="consoleLink"><label id="lblJulyEmails"> </label></td>
+    </tr>
+    <tr>
+        <td class="consoleLink" id="lblErrorMessage" colspan="4">&nbsp;</td>
+    </tr>
+</table>
+
+    <br />
+
+</asp:View>
 </asp:MultiView>
 
-<script>
+
+<script type="text/javascript">
 
     // Types: Reminder, JanFeb, March, July
     // Renditions: Live, WebmasterTest, AdministratorTest
@@ -249,16 +335,16 @@ THINGS YOU CAN DO:<br />
                             $("#lblJulyEmails").text('Email in progress')
                             break;
                     }
-                }
+            }
         }
         var postData = {
             Type: type,
             Rendition: rendition,
             Row: "1"
-        }
+    }
         $.ajax({
             type: "POST",
-            url: 'http://www.detailwindow.com/api/EmailService.asmx/SendEmail',
+            url: '<%= Path %>',
             data: JSON.stringify(postData),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -340,7 +426,7 @@ THINGS YOU CAN DO:<br />
         }
         $.ajax({
             type: "POST",
-            url: 'http://www.detailwindow.com/api/EmailService.asmx/SendEmail',
+            url: '<%= Path %>',
             data: JSON.stringify(postData),
             dataType: "json",
             contentType: "application/json; charset=utf-8",
