@@ -22,7 +22,7 @@ namespace detailwindow
         {
             get
             {
-                string path = String.Concat("http://", HttpContext.Current.Request.Url.Host, "/EmailService.asmx");
+                string path = String.Concat("http://", HttpContext.Current.Request.Url.Authority, "/api/EmailService.asmx/SendEmail");
                 return path;
             }
         }

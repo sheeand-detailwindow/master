@@ -322,6 +322,7 @@ THINGS YOU CAN DO:<br />
 
     // Types: Reminder, JanFeb, March, July
     // Renditions: Live, WebmasterTest, AdministratorTest
+    var path = '<%= Path %>';
 
     function SendEmail(type, rendition) {
         switch (rendition) {
@@ -384,7 +385,7 @@ THINGS YOU CAN DO:<br />
     }
         $.ajax({
             type: "POST",
-            url: '<%= Path %>',
+            url: path,
             data: JSON.stringify(postData),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -466,7 +467,7 @@ THINGS YOU CAN DO:<br />
         }
         $.ajax({
             type: "POST",
-            url: '<%= Path %>',
+            url: path,
             data: JSON.stringify(postData),
             dataType: "json",
             contentType: "application/json; charset=utf-8",
