@@ -40,18 +40,24 @@ namespace detailwindow.api
             objReader = objCommand.ExecuteReader();
             while (objReader.Read())
             {
-                data["LastName"] = objReader["LastName"];
-                data["Email"] = objReader["Email"];
-                data["AcountType"] = objReader["AcountType"];
-                data["LastLogin"] = objReader["LastLogin"];
-                data["NextReminder"] = objReader["NextReminder"];
-                data["Recurrency"] = objReader["Recurrency"];
-                data["ReminderOptOut"] = objReader["ReminderOptOut"];
-                data["SpecialsOptOut"] = objReader["SpecialsOptOut"];
-                data["PromoSent"] = objReader["PromoSent"];
+                data["LastName"] = DbNullCleaner(objReader["LastName"]);
+                data["Email"] = DbNullCleaner(objReader["Email"]);
+                data["AccountType"] = DbNullCleaner(objReader["AccountType"]);
+                data["LastLogin"] = DbNullCleaner(objReader["LastLogin"]);
+                data["NextReminder"] = DbNullCleaner(objReader["NextReminder"]);
+                data["Recurrency"] = DbNullCleaner(objReader["Recurrency"]);
+                data["ReminderOptOut"] = DbNullCleaner(objReader["ReminderOptOut"]);
+                data["SpecialsOptOut"] = DbNullCleaner(objReader["SpecialsOptOut"]);
+                data["PromoSent"] = DbNullCleaner(objReader["PromoSent"]);
                 dataList.Add(data);
             }
             Context.Cache.Insert("Data", dataList, null, DateTime.Now.AddHours(1), Cache.NoSlidingExpiration);
+        }
+
+        private object DbNullCleaner(object obj)
+        {
+            if (obj == DBNull.Value) obj = null;
+            return obj;
         }
         
         [WebMethod(Description = "This service has several uses, depending on the parameters given. For testing purposes, enter 'Reminder' for Type, 'WebmasterTest' for Rendition, and '1' for Row. This will send a test email to the webmaster.")]
@@ -122,8 +128,7 @@ namespace detailwindow.api
             List<string> returnMessage = new List<string>();
 
             // Declare return message
-            string EmailApi = "Email sent.";
-            string Row = row.ToString();
+            string Message = "Email sent";
 
             // Compose email
             switch (Type)
@@ -160,17 +165,41 @@ namespace detailwindow.api
                         // if row is no good, row++ and test again
                         // when a roow row is found, run email routine and bail out
                         // *********************************************************************************************************
-                        if (AccountType == 2)
+                        while ((row < maxRowCount) && (AccountType != 2 || String.IsNullOrEmpty(Email)))
                         {
-                            if (row < maxRowCount)
-                            {
-                                row++;
-                            }
-                            else
-                            {
-                                EmailApi = String.Concat(EmailApi, " - Done.");
-                            }
+                            // The last row has not been reached AND
+                            // The account is incorrect or the email address is missing
+                            // Advance to the next row
+                            row++;
                         }
+
+                        // Have we left the while loop because the account is correct and the email address is good?
+                        if ((AccountType == 2 && !String.IsNullOrEmpty(Email)))
+                        {
+                            Message = String.Concat("Email ", row.ToString(), " of ", maxRowCount.ToString(), " sent to ", Email);
+
+                            // Is it also the last row?
+                            if (row >= maxRowCount)
+                            {
+                                // The end of the list has been reached
+                                // Append the message to flag the javascript to bail out
+                                Message = String.Concat(Message, " - Done.");
+                            }
+
+                            // The account is correct and the email address is good
+                            Send(strSubject, strBody, Email);
+
+                            // Advance the row counter
+                            row++;
+                        }
+                        else
+                        {
+                            // We left the while loop because the end of the list has been reached
+                            // Append the message to flag the javascript to bail out
+                            Message = String.Concat(Message, "Done.");
+                        }
+
+
                         // *********************************************************************************************************
                     }
                     else
@@ -190,7 +219,8 @@ namespace detailwindow.api
                     break;
             }
 
-            returnMessage.Add(EmailApi);
+            string Row = row.ToString();
+            returnMessage.Add(Message);
             returnMessage.Add(Row);
             return returnMessage;
         }
