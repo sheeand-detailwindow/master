@@ -42,6 +42,7 @@ namespace detailwindow.api
             {
                 data["LastName"] = objReader["LastName"];
                 data["Email"] = objReader["Email"];
+                data["AcountType"] = objReader["AcountType"];
                 data["LastLogin"] = objReader["LastLogin"];
                 data["NextReminder"] = objReader["NextReminder"];
                 data["Recurrency"] = objReader["Recurrency"];
@@ -64,12 +65,39 @@ namespace detailwindow.api
             {
                 LoadCustomerCache();
             }
-                
+            
+            // Get cached data object
             dataList = (List<Dictionary<string, object>>)Context.Cache["Data"];
+            int maxRowCount = dataList.Count();
 
-            data = dataList[Convert.ToInt32(Row)];
+            // Get specific row
+            int row = Convert.ToInt32(Row);
+            data = dataList[row];
+
+            List<string> returnMessage;
+
+            // Failsafe
+            if (row <= maxRowCount)
+            {
+                // Run email routine
+                returnMessage = EmailRoutine(Type, Rendition, row, maxRowCount, data);
+            }
+            else
+            {
+                returnMessage = null;
+            }
+
+            return returnMessage;
+        }
+
+        
+        private List<string> EmailRoutine(string Type, string Rendition, int row, int maxRowCount, Dictionary<string, object> data)
+        {
+
+            // Get data from row
             string LastName = Convert.ToString(data["LastName"]);
             string Email = Convert.ToString(data["Email"]);
+            int AccountType = Convert.ToInt32(data["AccountType"]);
             DateTime LastLogin = Convert.ToDateTime(data["LastLogin"]);
             DateTime NextReminder = Convert.ToDateTime(data["NextReminder"]);
             int Recurrency = Convert.ToInt32(data["Recurrency"]);
@@ -77,6 +105,7 @@ namespace detailwindow.api
             bool SpecialsOptOut = Convert.ToBoolean(data["SpecialsOptOut"]);
             DateTime PromoSent = Convert.ToDateTime(data["PromoSent"]);
 
+            // Declare email components
             string strHeader = "<img src=\"cid:image1\"/><div style='font-family:Arial, Vernada;font-size:12px;'><br /><br />";
             string strReminder = "<p style='font-size:16px; font-weight:bold;'>It's time to have your glass cleaned!<br /></p>";
             string strDeepHome = "<p style='font-size:16px; font-weight:bold;'>Deep Home Cleaning<br /></p><p style='font-weight:bold;'>Your home will <span style='text-decoration:underline;'>FEEL</span> and <span style='text-decoration:underline;'>SMELL</span> clean&#33;</p><p><ul style='font-size:12px;'><li>Woodwork (baseboards, doors and frames)</li><li>Wood blinds and walls</li><li>Basements and garages</li><li>Under and behind major appliances, heavy furniture, and other hard-to-get places</li><li>Ceiling fans, chandeliers, mirrors, light fixtures, and more!</li></ul></p>";
@@ -91,9 +120,12 @@ namespace detailwindow.api
             string strSubject = "";
             string strBody = "";
             List<string> returnMessage = new List<string>();
-            string EmailApi = "Email sent.";
-            returnMessage.Add(EmailApi);
 
+            // Declare return message
+            string EmailApi = "Email sent.";
+            string Row = row.ToString();
+
+            // Compose email
             switch (Type)
             {
                 case "Reminder":
@@ -120,6 +152,33 @@ namespace detailwindow.api
             switch (Rendition)
             {
                 case "Live":
+
+                    if (Type != "Reminder")
+                    {
+                        // Promo iteration routine
+                        // Test row for 1) proper account type and 2) valid email address (not null or empty)
+                        // if row is no good, row++ and test again
+                        // when a roow row is found, run email routine and bail out
+                        // *********************************************************************************************************
+                        if (AccountType == 2)
+                        {
+                            if (row < maxRowCount)
+                            {
+                                row++;
+                            }
+                            else
+                            {
+                                EmailApi = String.Concat(EmailApi, " - Done.");
+                            }
+                        }
+                        // *********************************************************************************************************
+                    }
+                    else
+                    {
+                        // Live Reminder email (automated call)
+
+                    }
+
                     break;
 
                 case "WebmasterTest":
@@ -127,12 +186,15 @@ namespace detailwindow.api
                     break;
 
                 case "AdministratorTest":
+                    Send(strSubject, strBody, "janicg61@yahoo.com");
                     break;
             }
 
+            returnMessage.Add(EmailApi);
+            returnMessage.Add(Row);
             return returnMessage;
         }
-
+        
         private void Send(string subject, string strBody, string emailAddress)
         {
             SmtpClient client = new SmtpClient();
