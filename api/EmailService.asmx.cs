@@ -91,7 +91,8 @@ namespace detailwindow.api
             string strSubject = "";
             string strBody = "";
             List<string> returnMessage = new List<string>();
-            returnMessage[0] = "Email sent.";
+            string EmailApi = "Email sent.";
+            returnMessage.Add(EmailApi);
 
             switch (Type)
             {
@@ -144,7 +145,8 @@ namespace detailwindow.api
             av1.LinkedResources.Add(logo);
             mail.AlternateViews.Add(av1);
             client.Host = ConfigurationManager.AppSettings["SmtpServer"];
-            mail.From = new MailAddress(ConfigurationManager.AppSettings["MailFrom"]);
+            MailAddress from = new MailAddress(ConfigurationManager.AppSettings["MailFrom"], "Detail Window Cleaning");
+            mail.From = from;
             mail.To.Add(emailAddress);
             mail.IsBodyHtml = true;
             mail.Subject = subject;
