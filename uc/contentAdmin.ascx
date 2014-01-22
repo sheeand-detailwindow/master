@@ -381,7 +381,8 @@ THINGS YOU CAN DO:<br />
         var postData = {
             Type: type,
             Rendition: rendition,
-            Row: "1"
+            Row: "1",
+            Count: "0"
     }
         $.ajax({
             type: "POST",
@@ -444,9 +445,10 @@ THINGS YOU CAN DO:<br />
                             }
                             if (msg.indexOf("Done") == -1) {
                                 var row = obj.d[1];
+                                var count = obj.d[2];
 
                                 // Do the next row
-                                SendAnotherEmail(type, rendition, row);
+                                SendAnotherEmail(type, rendition, row, count);
                             }
                             break;
                     }
@@ -459,11 +461,12 @@ THINGS YOU CAN DO:<br />
         });
     }
 
-    function SendAnotherEmail(type, rendition, row) {
+    function SendAnotherEmail(type, rendition, row, count) {
         var postData = {
             Type: type,
             Rendition: rendition,
-            Row: row
+            Row: row,
+            Count: count
         }
         $.ajax({
             type: "POST",
@@ -490,7 +493,8 @@ THINGS YOU CAN DO:<br />
                     }
                     if (msg.indexOf("***Done***") == -1) {
                         var row = obj.d[1];
-                        SendAnotherEmail(type, rendition, row);
+                        var count = obj.d[2];
+                        SendAnotherEmail(type, rendition, row, count);
                     }
                 }
             },

@@ -31,7 +31,6 @@ namespace detailwindow.api
         [WebMethod(Description = "Loads cache object from database. This method is asynchroniously called upon requesting admin.aspx")]
         public void LoadCustomerCache()
         {
-            Dictionary<string, object> data = new Dictionary<string, object>();
             List<Dictionary<string, object>> dataList = new List<Dictionary<string, object>>();
             OleDbDataReader objReader = null;
             string strSQL = "SELECT * FROM Customer";
@@ -40,6 +39,7 @@ namespace detailwindow.api
             objReader = objCommand.ExecuteReader();
             while (objReader.Read())
             {
+                Dictionary<string, object> data = new Dictionary<string, object>();
                 data["LastName"] = DbNullCleaner(objReader["LastName"]);
                 data["Email"] = DbNullCleaner(objReader["Email"]);
                 data["AccountType"] = DbNullCleaner(objReader["AccountType"]);
@@ -51,6 +51,7 @@ namespace detailwindow.api
                 data["PromoSent"] = DbNullCleaner(objReader["PromoSent"]);
                 dataList.Add(data);
             }
+            _objConnection.Close();
             Context.Cache.Insert("Data", dataList, null, DateTime.Now.AddHours(1), Cache.NoSlidingExpiration);
         }
 
@@ -61,7 +62,7 @@ namespace detailwindow.api
         }
         
         [WebMethod(Description = "This service has several uses, depending on the parameters given. For testing purposes, enter 'Reminder' for Type, 'WebmasterTest' for Rendition, and '1' for Row. This will send a test email to the webmaster.")]
-        public List<string> SendEmail(string Type, string Rendition, string Row)
+        public List<string> SendEmail(string Type, string Rendition, string Row, string Count)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
             List<Dictionary<string, object>> dataList = new List<Dictionary<string, object>>();
@@ -78,15 +79,15 @@ namespace detailwindow.api
 
             // Get specific row
             int row = Convert.ToInt32(Row);
-            data = dataList[row];
 
             List<string> returnMessage;
+            int count = Convert.ToInt32(Count);
 
             // Failsafe
-            if (row <= maxRowCount)
+            if (row < maxRowCount)
             {
                 // Run email routine
-                returnMessage = EmailRoutine(Type, Rendition, row, maxRowCount, data);
+                returnMessage = EmailRoutine(Type, Rendition, count, row, maxRowCount, dataList);
             }
             else
             {
@@ -97,19 +98,19 @@ namespace detailwindow.api
         }
 
         
-        private List<string> EmailRoutine(string Type, string Rendition, int row, int maxRowCount, Dictionary<string, object> data)
+        private List<string> EmailRoutine(string Type, string Rendition, int count, int row, int maxRowCount, List<Dictionary<string, object>> dataList)
         {
 
             // Get data from row
-            string LastName = Convert.ToString(data["LastName"]);
-            string Email = Convert.ToString(data["Email"]);
-            int AccountType = Convert.ToInt32(data["AccountType"]);
-            DateTime LastLogin = Convert.ToDateTime(data["LastLogin"]);
-            DateTime NextReminder = Convert.ToDateTime(data["NextReminder"]);
-            int Recurrency = Convert.ToInt32(data["Recurrency"]);
-            bool ReminderOptOut = Convert.ToBoolean(data["ReminderOptOut"]);
-            bool SpecialsOptOut = Convert.ToBoolean(data["SpecialsOptOut"]);
-            DateTime PromoSent = Convert.ToDateTime(data["PromoSent"]);
+            string LastName = Convert.ToString(dataList[row]["LastName"]);
+            string Email = Convert.ToString(dataList[row]["Email"]);
+            int AccountType = Convert.ToInt32(dataList[row]["AccountType"]);
+            DateTime LastLogin = Convert.ToDateTime(dataList[row]["LastLogin"]);
+            DateTime NextReminder = Convert.ToDateTime(dataList[row]["NextReminder"]);
+            int Recurrency = Convert.ToInt32(dataList[row]["Recurrency"]);
+            bool ReminderOptOut = Convert.ToBoolean(dataList[row]["ReminderOptOut"]);
+            bool SpecialsOptOut = Convert.ToBoolean(dataList[row]["SpecialsOptOut"]);
+            DateTime PromoSent = Convert.ToDateTime(dataList[row]["PromoSent"]);
 
             // Declare email components
             string strHeader = "<img src=\"cid:image1\"/><div style='font-family:Arial, Vernada;font-size:12px;'><br /><br />";
@@ -165,21 +166,37 @@ namespace detailwindow.api
                         // if row is no good, row++ and test again
                         // when a roow row is found, run email routine and bail out
                         // *********************************************************************************************************
+                        Dictionary<string, object> data;
                         while ((row < maxRowCount) && (AccountType != 2 || String.IsNullOrEmpty(Email)))
                         {
                             // The last row has not been reached AND
                             // The account is incorrect or the email address is missing
                             // Advance to the next row
                             row++;
+
+                            // Get specific row data
+                            data = dataList[row];
+
+                            // Get data from row
+                            LastName = Convert.ToString(dataList[row]["LastName"]);
+                            Email = Convert.ToString(dataList[row]["Email"]);
+                            AccountType = Convert.ToInt32(dataList[row]["AccountType"]);
+                            LastLogin = Convert.ToDateTime(dataList[row]["LastLogin"]);
+                            NextReminder = Convert.ToDateTime(dataList[row]["NextReminder"]);
+                            Recurrency = Convert.ToInt32(dataList[row]["Recurrency"]);
+                            ReminderOptOut = Convert.ToBoolean(dataList[row]["ReminderOptOut"]);
+                            SpecialsOptOut = Convert.ToBoolean(dataList[row]["SpecialsOptOut"]);
+                            PromoSent = Convert.ToDateTime(dataList[row]["PromoSent"]);
                         }
 
                         // Have we left the while loop because the account is correct and the email address is good?
                         if ((AccountType == 2 && !String.IsNullOrEmpty(Email)))
                         {
-                            Message = String.Concat("Email ", row.ToString(), " of ", maxRowCount.ToString(), " sent to ", Email);
+                            count++;
+                            Message = String.Concat("Email ", count.ToString(), " sent to ", Email);
 
                             // Is it also the last row?
-                            if (row >= maxRowCount)
+                            if (row + 1 >= maxRowCount)
                             {
                                 // The end of the list has been reached
                                 // Append the message to flag the javascript to bail out
@@ -187,7 +204,7 @@ namespace detailwindow.api
                             }
 
                             // The account is correct and the email address is good
-                            Send(strSubject, strBody, Email);
+                            // Send(strSubject, strBody, Email);
 
                             // Advance the row counter
                             row++;
@@ -196,7 +213,7 @@ namespace detailwindow.api
                         {
                             // We left the while loop because the end of the list has been reached
                             // Append the message to flag the javascript to bail out
-                            Message = String.Concat(Message, "Done.");
+                            Message = String.Concat(Message, "***Done***");
                         }
 
 
@@ -220,8 +237,10 @@ namespace detailwindow.api
             }
 
             string Row = row.ToString();
+            string Count = count.ToString();
             returnMessage.Add(Message);
             returnMessage.Add(Row);
+            returnMessage.Add(Count);
             return returnMessage;
         }
         
