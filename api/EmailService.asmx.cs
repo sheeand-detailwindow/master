@@ -167,12 +167,12 @@ namespace detailwindow.api
                         // when a roow row is found, run email routine and bail out
                         // *********************************************************************************************************
                         Dictionary<string, object> data;
-                        while ((row < maxRowCount) && (AccountType != 2 || String.IsNullOrEmpty(Email)))
+
+                    Loop:
+
+                        if (row + 1 < maxRowCount)
                         {
-                            // The last row has not been reached AND
-                            // The account is incorrect or the email address is missing
-                            // Advance to the next row
-                            row++;
+                            // The last row has not been reached
 
                             // Get specific row data
                             data = dataList[row];
@@ -187,34 +187,42 @@ namespace detailwindow.api
                             ReminderOptOut = Convert.ToBoolean(dataList[row]["ReminderOptOut"]);
                             SpecialsOptOut = Convert.ToBoolean(dataList[row]["SpecialsOptOut"]);
                             PromoSent = Convert.ToDateTime(dataList[row]["PromoSent"]);
-                        }
 
-                        // Have we left the while loop because the account is correct and the email address is good?
-                        if ((AccountType == 2 && !String.IsNullOrEmpty(Email)))
-                        {
-                            count++;
-                            Message = String.Concat("Email ", count.ToString(), " sent to ", Email);
-
-                            // Is it also the last row?
-                            if (row + 1 >= maxRowCount)
+                            // Is the account is correct and the email address is good?
+                            if ((AccountType == 2 && !String.IsNullOrEmpty(Email)))
                             {
-                                // The end of the list has been reached
-                                // Append the message to flag the javascript to bail out
-                                Message = String.Concat(Message, " - Done.");
+                                count++;
+                                Message = String.Concat("Email ", count.ToString(), " sent to ", Email);
+
+                                // Is it also the last row?
+                                if (row + 1 >= maxRowCount)
+                                {
+                                    // The end of the list has been reached
+                                    // Append the message to flag the javascript to bail out
+                                    Message = String.Concat(Message, " - Done.");
+                                }
+
+                                // The account is correct and the email address is good
+                                // Send(strSubject, strBody, Email);
+
+                                // Advance the row counter
+                                row++;
                             }
-
-                            // The account is correct and the email address is good
-                            // Send(strSubject, strBody, Email);
-
-                            // Advance the row counter
-                            row++;
+                            else
+                            {
+                                // The account is incorrect or the email address is missing
+                                // Advance to the next row
+                                row++;
+                                goto Loop;
+                            }
                         }
                         else
                         {
-                            // We left the while loop because the end of the list has been reached
+                            // We left the loop because the end of the list has been reached
                             // Append the message to flag the javascript to bail out
                             Message = String.Concat(Message, "***Done***");
                         }
+
 
 
                         // *********************************************************************************************************
