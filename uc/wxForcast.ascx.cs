@@ -12,27 +12,10 @@ using System.ComponentModel;
 using System.Data;
 using detailwindow.DataSet1TableAdapters;
 
-// ASP.NET 4.0
 namespace detailwindow.uc
 {
     public partial class wxForcast : System.Web.UI.UserControl
     {
-
-        //private object ConvertToString(object obj)
-        //{
-        //    Type t = obj.GetType();
-
-        //    if (t.IsValueType)
-        //    {
-        //        // For value types
-        //        if (t == null) return DBNull.Value;
-        //        else return obj;
-        //    }
-        //    else return obj;
-        //}
-
-
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!Page.IsPostBack)
@@ -505,6 +488,5 @@ namespace detailwindow.uc
                 weatherconditions.Insert(columnValue[0], columnValue[1], columnValue[2], columnValue[3]);
             }
         }
-
     }
 }

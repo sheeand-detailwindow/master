@@ -83,7 +83,7 @@ namespace detailwindow.api
             List<string> returnMessage;
             int count = Convert.ToInt32(Count);
 
-            // Failsafe
+            // Failsafe in case the javascript to bail out didn't stop looping
             if (row < maxRowCount)
             {
                 // Run email routine
@@ -170,9 +170,9 @@ namespace detailwindow.api
 
                     Loop:
 
-                        if (row + 1 < maxRowCount)
+                        if (row < maxRowCount)
                         {
-                            // The last row has not been reached
+                            // The zero-based row will not be exceeding the max row count
 
                             // Get specific row data
                             data = dataList[row];
@@ -191,19 +191,19 @@ namespace detailwindow.api
                             // Is the account is correct and the email address is good?
                             if ((AccountType == 2 && !String.IsNullOrEmpty(Email)))
                             {
+                                // The account is correct and the email address is good
                                 count++;
                                 Message = String.Concat("Email ", count.ToString(), " sent to ", Email);
 
-                                // Is it also the last row?
+                                Send(strSubject, strBody, Email);
+
+                                // Is this the last zero-based row?
                                 if (row + 1 >= maxRowCount)
                                 {
                                     // The end of the list has been reached
                                     // Append the message to flag the javascript to bail out
                                     Message = String.Concat(Message, " - Done.");
                                 }
-
-                                // The account is correct and the email address is good
-                                // Send(strSubject, strBody, Email);
 
                                 // Advance the row counter
                                 row++;
