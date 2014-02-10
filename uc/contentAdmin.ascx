@@ -443,7 +443,7 @@ THINGS YOU CAN DO:<br />
                                     $("#lblJulyEmails").text(msg)
                                     break;
                             }
-                            if (msg.indexOf("Done") == -1) {
+                            if (msg.indexOf("**Done**") == -1) {
                                 var row = obj.d[1];
                                 var count = obj.d[2];
 
@@ -491,7 +491,7 @@ THINGS YOU CAN DO:<br />
                             $("#lblJulyEmails").text(msg)
                             break;
                     }
-                    if (msg.indexOf("***Done***") == -1) {
+                    if (msg.indexOf("**Done**") == -1) {
                         var row = obj.d[1];
                         var count = obj.d[2];
                         SendAnotherEmail(type, rendition, row, count);

@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.OleDb;
 using System.Linq;
+using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Web;
@@ -76,22 +77,31 @@ namespace detailwindow.api
             // Get cached data object
             dataList = (List<Dictionary<string, object>>)Context.Cache["Data"];
             int maxRowCount = dataList.Count();
+            List<string> returnMessage;
 
             // Get specific row
-            int row = Convert.ToInt32(Row);
-
-            List<string> returnMessage;
-            int count = Convert.ToInt32(Count);
-
-            // Failsafe in case the javascript to bail out didn't stop looping
-            if (row < maxRowCount)
+            if (Type == "Reminder")
             {
+                List<Dictionary<string, object>> reminderDataList = GetReminderDataList(dataList);
+
                 // Run email routine
-                returnMessage = EmailRoutine(Type, Rendition, count, row, maxRowCount, dataList);
+                returnMessage = EmailRoutine(Type, Rendition, 0, 0, 0, reminderDataList);
             }
             else
             {
-                returnMessage = null;
+                int row = Convert.ToInt32(Row);
+                int count = Convert.ToInt32(Count);
+
+                // Failsafe in case the javascript to bail out didn't stop looping
+                if (row < maxRowCount)
+                {
+                    // Run email routine
+                    returnMessage = EmailRoutine(Type, Rendition, count, row, maxRowCount, dataList);
+                }
+                else
+                {
+                    returnMessage = null;
+                }
             }
 
             return returnMessage;
@@ -113,20 +123,21 @@ namespace detailwindow.api
             DateTime PromoSent = Convert.ToDateTime(dataList[row]["PromoSent"]);
 
             // Declare email components
-            string strHeader = "<img src=\"cid:image1\"/><div style='font-family:Arial, Vernada;font-size:12px;'><br /><br />";
+            //string strHeader = "<img src=\"cid:image1\"/><div style='font-family:Arial, Vernada;font-size:12px;'><br /><br />";
+            string strHeader = "<img src='http://www.detailwindow.com/api/detailLogoMini.png'><div style='font-family:Arial, Vernada;font-size:12px;'><br /><br />";
             string strReminder = "<p style='font-size:16px; font-weight:bold;'>It's time to have your glass cleaned!<br /></p>";
             string strDeepHome = "<p style='font-size:16px; font-weight:bold;'>Deep Home Cleaning<br /></p><p style='font-weight:bold;'>Your home will <span style='text-decoration:underline;'>FEEL</span> and <span style='text-decoration:underline;'>SMELL</span> clean&#33;</p><p><ul style='font-size:12px;'><li>Woodwork (baseboards, doors and frames)</li><li>Wood blinds and walls</li><li>Basements and garages</li><li>Under and behind major appliances, heavy furniture, and other hard-to-get places</li><li>Ceiling fans, chandeliers, mirrors, light fixtures, and more!</li></ul></p>";
             string strSchedNow = "<p style='font-size:14px;'>Schedule your appointment now&#33;</p><p style='font-size:14px;'>Go to <a href='http://www.detailwindow.com'>www.DetailWindow.com</a>.<br />Or, call (317) 842-5326.</p>";
             string strWinterStart = "<hr><p style='font-size:16px; font-weight:bold;'>Winter discounts on window cleaning&#33<ul style='font-size:12px;'>";
-            string strJanFeb = "<li>For work completed in January: 20% discount on window cleaning</li><li>For work completed in February: 20% discount on window cleaning</li>";
+            string strJanFeb = "<li>For work completed in February: <span style='text-decoration:line-through;'>20%</span> <span style='font-weight:bold;'>NOW 25%</span> discount on window cleaning</li>";
             string strMarch = "<li>For work completed in March: 15% discount on window cleaning</li>";
             string strWinterEnd = "</ul></p>";
             string strJuly = "<p style='font-size:16px; font-weight:bold;'>Summer savings on window cleaning&#33<ul style='font-size:12px;'><li>For work completed in July: 10% discount on window cleaning</li></ul></p>";
+            string strSchedDiscount = "<p style='font-size:14px;'>Schedule your appointment now&#33;</p><p style='font-size:14px;'>Go to <a href='http://www.detailwindow.com'>www.DetailWindow.com</a> and mention the discount in the comments.<br />Or call (317) 842-5326 and mention the discount to our customer service representative.</p>";
             string strFooter = "<p><span style='color:#aa0000; font-weight:bold;'>Detail Window Cleaning - RJJK, Inc.</span><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8226 Detail-minded professionals<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8226 Serving greater Indianapolis</p><br /></div>";
 
             string strSubject = "";
             string strBody = "";
-            List<string> returnMessage = new List<string>();
 
             // Declare return message
             string Message = "Email sent";
@@ -141,12 +152,12 @@ namespace detailwindow.api
 
                 case "JanFeb":
                     strSubject = "Winter Discounts!";
-                    strBody = String.Concat(strHeader, strDeepHome, strSchedNow, strWinterStart, strJanFeb, strWinterEnd, strFooter);
+                    strBody = String.Concat(strHeader, strDeepHome, strSchedNow, strWinterStart, strJanFeb, strWinterEnd, strSchedDiscount, strFooter);
                     break;
 
                 case "March":
                     strSubject = "Winter Discounts!";
-                    strBody = String.Concat(strHeader, strDeepHome, strSchedNow, strWinterStart, strMarch, strWinterEnd, strFooter);
+                    strBody = String.Concat(strHeader, strDeepHome, strSchedNow, strWinterStart, strMarch, strWinterEnd, strSchedDiscount, strFooter);
                     break;
 
                 case "July":
@@ -189,12 +200,13 @@ namespace detailwindow.api
                             PromoSent = Convert.ToDateTime(dataList[row]["PromoSent"]);
 
                             // Is the account is correct and the email address is good?
-                            if ((AccountType == 2 && !String.IsNullOrEmpty(Email)))
+                            if ((AccountType == 0 && !String.IsNullOrEmpty(Email)))
                             {
                                 // The account is correct and the email address is good
                                 count++;
                                 Message = String.Concat("Email ", count.ToString(), " sent to ", Email);
 
+                                // *************************************
                                 Send(strSubject, strBody, Email);
 
                                 // Is this the last zero-based row?
@@ -202,7 +214,7 @@ namespace detailwindow.api
                                 {
                                     // The end of the list has been reached
                                     // Append the message to flag the javascript to bail out
-                                    Message = String.Concat(Message, " - Done.");
+                                    Message = String.Concat(Message, " **Done**");
                                 }
 
                                 // Advance the row counter
@@ -220,7 +232,7 @@ namespace detailwindow.api
                         {
                             // We left the loop because the end of the list has been reached
                             // Append the message to flag the javascript to bail out
-                            Message = String.Concat(Message, "***Done***");
+                            Message = String.Concat(Message, "**Done**");
                         }
 
 
@@ -230,6 +242,9 @@ namespace detailwindow.api
                     else
                     {
                         // Live Reminder email (automated call)
+
+                        // ************************************
+                        //Send(strSubject, strBody, Email);
 
                     }
 
@@ -244,37 +259,65 @@ namespace detailwindow.api
                     break;
             }
 
-            string Row = row.ToString();
-            string Count = count.ToString();
-            returnMessage.Add(Message);
-            returnMessage.Add(Row);
-            returnMessage.Add(Count);
+            // Prepare return message & notify webmaster
+            List<string> returnMessage = new List<string>();
+            if (Type == "Reminder")
+            {
+                // Send confirmation email to webmaster
+                Send(String.Concat("Reminder Sent To ", Email), strBody, ConfigurationManager.AppSettings["MailToWebmaster"]);
+            }
+            else
+            {
+                string Row = row.ToString();
+                string Count = count.ToString();
+                returnMessage.Add(Message);
+                returnMessage.Add(Row);
+                returnMessage.Add(Count);
+
+                if (Message.IndexOf("**Done**") > -1)
+                {
+                    // Send confirmation email to webmaster
+                    Send(Message, strBody, ConfigurationManager.AppSettings["MailToWebmaster"]);
+                }
+            }
             return returnMessage;
         }
         
         private void Send(string subject, string strBody, string emailAddress)
         {
-            SmtpClient client = new SmtpClient();
+            //LinkedResource logo = new LinkedResource(Server.MapPath(".") + @"\detailLogoMini.gif", MediaTypeNames.Image.Gif);
+            //logo.ContentId = "image1";
+            //logo.ContentType.Name = "detailLogoMini.gif";
+            //logo.TransferEncoding = System.Net.Mime.TransferEncoding.Base64;
+
+            //AlternateView av1 = AlternateView.CreateAlternateViewFromString(strBody, null, MediaTypeNames.Text.Html);
+            //av1.LinkedResources.Add(logo);
+
             MailMessage mail = new MailMessage();
-            string strpath = Server.MapPath(@"detailLogoMini.gif");
-            LinkedResource logo = new LinkedResource(strpath, MediaTypeNames.Image.Gif);
-            logo.ContentId = "image1";
-            logo.ContentType.Name = "detailLogoMini.gif";
-            AlternateView av1 = AlternateView.CreateAlternateViewFromString(strBody, null, MediaTypeNames.Text.Html);
-            av1.LinkedResources.Add(logo);
-            mail.AlternateViews.Add(av1);
-            client.Host = ConfigurationManager.AppSettings["SmtpServer"];
-            MailAddress from = new MailAddress(ConfigurationManager.AppSettings["MailFrom"], "Detail Window Cleaning");
-            mail.From = from;
-            mail.To.Add(emailAddress);
+            //mail.AlternateViews.Add(av1);
+            mail.Body = strBody;
             mail.IsBodyHtml = true;
+            mail.From = new MailAddress(ConfigurationManager.AppSettings["MailFrom"], "Detail Window Cleaning");
+            mail.To.Add(emailAddress);
             mail.Subject = subject;
-            if (ConfigurationManager.AppSettings["SmtpServer"] == "smtp.comcast.net")
+
+            SmtpClient client = new SmtpClient();
+            client.Host = ConfigurationManager.AppSettings["SmtpServer"];
+            System.Net.NetworkCredential credComcast = new System.Net.NetworkCredential("sheeand", "MSLKQcg");
+            System.Net.NetworkCredential credGoDaddy = new System.Net.NetworkCredential("webmaster@detailwindow.com", "tbitwog1");
+            switch (ConfigurationManager.AppSettings["SmtpServer"])
             {
-                client.Port = 587;
-                client.UseDefaultCredentials = false;
-                System.Net.NetworkCredential cred = new System.Net.NetworkCredential("sheeand", "MSLKQcg");
-                client.Credentials = cred;
+                case "smtp.comcast.net":
+                    client.Port = 587;
+                    client.UseDefaultCredentials = false;
+                    client.Credentials = credComcast;
+                    break;
+
+                case "smtpout.secureserver.net":
+                    client.Port = 25;
+                    client.UseDefaultCredentials = false;
+                    client.Credentials = credGoDaddy;
+                    break;
             }
             using (client)
             {
@@ -293,27 +336,19 @@ namespace detailwindow.api
             }
         }
 
-        public string SendAnotherEmail(string Type, string Rendition, string Row)
+        private List<Dictionary<string, object>> GetReminderDataList(List<Dictionary<string, object>> dataList)
         {
-            string message = "";
-            switch (Rendition)
+            List<Dictionary<string, object>> reminderDataList = new List<Dictionary<string, object>>();
+            Dictionary<string, object> dataRow = new Dictionary<string, object>();
+            foreach (Dictionary<string, object> row in dataList)
             {
-                case "JanFeb":
-                    break;
-
-                case "March":
-                    break;
-
-                case "July":
-                    break;
+                if ((DateTime)row["NextReminder"] < DateTime.Now)
+                {
+                    reminderDataList.Add(row);
+                }
             }
 
-            return message;
-        }
-
-        private void ComposeAndSendEmail(string type, string emailAddress)
-        {
-
+            return reminderDataList;
         }
 
     }
