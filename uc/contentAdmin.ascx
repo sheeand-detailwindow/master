@@ -20,6 +20,9 @@
         }
    </style>
 
+<link type="text/css" rel="stylesheet" href="../Scripts/jquery-ui-1.10.4.custom/css/smoothness/jquery-ui-1.10.4.custom.min.css" />
+<script type="text/javascript" src="../Scripts/jquery-ui-1.10.4.custom/js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="../Scripts/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js"></script>
 
 <asp:MultiView ID="MultiView1" runat="server" ActiveViewIndex="0">
 
@@ -254,6 +257,9 @@ THINGS YOU CAN DO:<br />
             <td class="auto-style3">
                 <asp:Button ID="Button6" runat="server" OnClick="btnHome_Click" Text="Return to home page" />
             </td>
+            <td>
+                Send promo if previous emails were sent before: <input type="text" id="datepicker" name="datepicker">
+            </td>
             <td class="auto-style3">
                 <asp:Button ID="Button7" runat="server" commandargument="View1" commandname="SwitchViewByID" Text="Customer List" />
             </td>
@@ -319,6 +325,9 @@ THINGS YOU CAN DO:<br />
 
 
 <script type="text/javascript">
+    $(document).ready ( function () {
+        $("#datepicker").datepicker()
+    })
 
     // Types: Reminder, JanFeb, March, July
     // Renditions: Live, WebmasterTest, AdministratorTest
@@ -378,11 +387,13 @@ THINGS YOU CAN DO:<br />
                     }
             }
         }
+        var date = $("#datepicker").datepicker("getDate");
         var postData = {
             Type: type,
             Rendition: rendition,
             Row: "1",
-            Count: "0"
+            Count: "0",
+            CutoffDate: date
     }
         $.ajax({
             type: "POST",
@@ -391,11 +402,12 @@ THINGS YOU CAN DO:<br />
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (obj) {
-                var msg = obj.d[0];
-                if (msg.indexOf("EmailApi") != -1) {
-                    $("#lblErrorMessage").text(msg)
-                }
-                else {
+                if (obj.d != null) {
+                    if (obj.d.length < 1) {
+                        $("#lblErrorMessage").text(msg)
+                    }
+                    else {
+                    var msg = obj.d[0];
                     switch (rendition) {
                         case 'WebmasterTest':
                             switch (type) {
@@ -443,31 +455,31 @@ THINGS YOU CAN DO:<br />
                                     $("#lblJulyEmails").text(msg)
                                     break;
                             }
-                            if (msg.indexOf("**Done**") == -1) {
+                            if ((obj.d.length == 3) || (msg.indexOf("**Done**") == -1)) {
                                 var row = obj.d[1];
                                 var count = obj.d[2];
-
-                                // Do the next row
                                 SendAnotherEmail(type, rendition, row, count);
                             }
                             break;
+                        }
                     }
                 }
             },
-            error: function (obj) {
-                var msg = obj.d[1];
+            error: function (msg) {
                 $("#lblErrorMessage").text(msg)
             }
         });
     }
 
     function SendAnotherEmail(type, rendition, row, count) {
+        var date = $("#datepicker").datepicker("getDate");
         var postData = {
             Type: type,
             Rendition: rendition,
             Row: row,
-            Count: count
-        }
+            Count: count,   
+            CutoffDate: date
+    }
         $.ajax({
             type: "POST",
             url: path,
@@ -475,31 +487,32 @@ THINGS YOU CAN DO:<br />
             dataType: "json",
             contentType: "application/json; charset=utf-8",
             success: function (obj) {
-                var msg = obj.d[0];
-                if (msg.indexOf("EmailApi") != -1) {
-                    $("#lblErrorMessage").text(msg)
-                }
-                else {
-                    switch (type) {
-                        case 'JanFeb':
-                            $("#lblJanFebEmails").text(msg)
-                            break;
-                        case 'March':
-                            $("#lblMarchEmails").text(msg)
-                            break;
-                        case 'July':
-                            $("#lblJulyEmails").text(msg)
-                            break;
+                if (obj.d != null) {
+                    if (obj.d.length.count < 1) {
+                        $("#lblErrorMessage").text(msg)
                     }
-                    if (msg.indexOf("**Done**") == -1) {
-                        var row = obj.d[1];
-                        var count = obj.d[2];
-                        SendAnotherEmail(type, rendition, row, count);
+                    else {
+                        var msg = obj.d[0];
+                        switch (type) {
+                            case 'JanFeb':
+                                $("#lblJanFebEmails").text(msg)
+                                break;
+                            case 'March':
+                                $("#lblMarchEmails").text(msg)
+                                break;
+                            case 'July':
+                                $("#lblJulyEmails").text(msg)
+                                break;
+                        }
+                        if ((obj.d.length == 3) || (msg.indexOf("**Done**") == -1)) {
+                            var row = obj.d[1];
+                            var count = obj.d[2];
+                            SendAnotherEmail(type, rendition, row, count);
+                        }
                     }
                 }
             },
-            error: function (obj) {
-                var msg = obj.d[1];
+            error: function (msg) {
                 $("#lblErrorMessage").text(msg)
             }
         });

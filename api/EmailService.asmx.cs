@@ -12,6 +12,9 @@ using System.Web.Services;
 using System.ServiceModel.Channels;
 //using Newtonsoft.Json.Serialization;
 using System.Web.Caching;
+using System.Net.Sockets;
+using System.IO;
+using System.Text;
 
 
 namespace detailwindow.api
@@ -36,23 +39,27 @@ namespace detailwindow.api
             OleDbDataReader objReader = null;
             string strSQL = "SELECT * FROM Customer";
             OleDbCommand objCommand = new OleDbCommand(strSQL, _objConnection);
-            _objConnection.Open();
-            objReader = objCommand.ExecuteReader();
-            while (objReader.Read())
+            using (_objConnection)
             {
-                Dictionary<string, object> data = new Dictionary<string, object>();
-                data["LastName"] = DbNullCleaner(objReader["LastName"]);
-                data["Email"] = DbNullCleaner(objReader["Email"]);
-                data["AccountType"] = DbNullCleaner(objReader["AccountType"]);
-                data["LastLogin"] = DbNullCleaner(objReader["LastLogin"]);
-                data["NextReminder"] = DbNullCleaner(objReader["NextReminder"]);
-                data["Recurrency"] = DbNullCleaner(objReader["Recurrency"]);
-                data["ReminderOptOut"] = DbNullCleaner(objReader["ReminderOptOut"]);
-                data["SpecialsOptOut"] = DbNullCleaner(objReader["SpecialsOptOut"]);
-                data["PromoSent"] = DbNullCleaner(objReader["PromoSent"]);
-                dataList.Add(data);
+                _objConnection.Open();
+                objReader = objCommand.ExecuteReader();
+                while (objReader.Read())
+                {
+                    Dictionary<string, object> data = new Dictionary<string, object>();
+                    data["ID"] = DbNullCleaner(objReader["ID"]);
+                    data["LastName"] = DbNullCleaner(objReader["LastName"]);
+                    data["Email"] = DbNullCleaner(objReader["Email"]);
+                    data["AccountType"] = DbNullCleaner(objReader["AccountType"]);
+                    data["LastLogin"] = DbNullCleaner(objReader["LastLogin"]);
+                    data["NextReminder"] = DbNullCleaner(objReader["NextReminder"]);
+                    data["Recurrency"] = DbNullCleaner(objReader["Recurrency"]);
+                    data["ReminderOptOut"] = DbNullCleaner(objReader["ReminderOptOut"]);
+                    data["SpecialsOptOut"] = DbNullCleaner(objReader["SpecialsOptOut"]);
+                    data["PromoSent"] = DbNullCleaner(objReader["PromoSent"]);
+                    dataList.Add(data);
+                }
+                _objConnection.Close();
             }
-            _objConnection.Close();
             Context.Cache.Insert("Data", dataList, null, DateTime.Now.AddHours(1), Cache.NoSlidingExpiration);
         }
 
@@ -61,42 +68,46 @@ namespace detailwindow.api
             if (obj == DBNull.Value) obj = null;
             return obj;
         }
-        
+
         [WebMethod(Description = "This service has several uses, depending on the parameters given. For testing purposes, enter 'Reminder' for Type, 'WebmasterTest' for Rendition, and '1' for Row. This will send a test email to the webmaster.")]
-        public List<string> SendEmail(string Type, string Rendition, string Row, string Count)
+        public List<string> SendEmail(string Type, string Rendition, string Row, string Count, string CutoffDate)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
             List<Dictionary<string, object>> dataList = new List<Dictionary<string, object>>();
             object objCache = Context.Cache["Data"];
-            
+
+            DateTime sendCutoffDate = Convert.ToDateTime(CutoffDate);
+
             if (objCache == null)
             {
                 LoadCustomerCache();
             }
-            
+
             // Get cached data object
             dataList = (List<Dictionary<string, object>>)Context.Cache["Data"];
             int maxRowCount = dataList.Count();
             List<string> returnMessage;
 
-            // Get specific row
             if (Type == "Reminder")
             {
+                // Reminder ????????????????????????????????? CONSIDER PUTTING THIS STUFF NEAR LINE 262   ?????????????????????????????????????
+                // Get specific row
                 List<Dictionary<string, object>> reminderDataList = GetReminderDataList(dataList);
 
                 // Run email routine
-                returnMessage = EmailRoutine(Type, Rendition, 0, 0, 0, reminderDataList);
+                returnMessage = EmailRoutine(Type, Rendition, 0, 0, 0, reminderDataList, DateTime.MinValue);
             }
             else
             {
+                // Promo
                 int row = Convert.ToInt32(Row);
-                int count = Convert.ToInt32(Count);
+                int emailCount = Convert.ToInt32(Count);
 
                 // Failsafe in case the javascript to bail out didn't stop looping
                 if (row < maxRowCount)
                 {
                     // Run email routine
-                    returnMessage = EmailRoutine(Type, Rendition, count, row, maxRowCount, dataList);
+                    returnMessage = EmailRoutine(Type, Rendition, emailCount, row, maxRowCount, dataList, sendCutoffDate);
                 }
                 else
                 {
@@ -107,11 +118,11 @@ namespace detailwindow.api
             return returnMessage;
         }
 
-        
-        private List<string> EmailRoutine(string Type, string Rendition, int count, int row, int maxRowCount, List<Dictionary<string, object>> dataList)
-        {
 
+        private List<string> EmailRoutine(string Type, string Rendition, int emailCount, int row, int maxRowCount, List<Dictionary<string, object>> dataList, DateTime cutoffDate)
+        {
             // Get data from row
+            long ID = Convert.ToInt64(dataList[row]["ID"]);
             string LastName = Convert.ToString(dataList[row]["LastName"]);
             string Email = Convert.ToString(dataList[row]["Email"]);
             int AccountType = Convert.ToInt32(dataList[row]["AccountType"]);
@@ -175,20 +186,18 @@ namespace detailwindow.api
                         // Promo iteration routine
                         // Test row for 1) proper account type and 2) valid email address (not null or empty)
                         // if row is no good, row++ and test again
-                        // when a roow row is found, run email routine and bail out
-                        // *********************************************************************************************************
-                        Dictionary<string, object> data;
+                        // when a good row is found, run email routine and bail out
 
-                    Loop:
 
-                        if (row < maxRowCount)
+                        // Set max email count 
+                        // Max. limit = 230 emails (GoDaddy email account allows 250 referrers per day)
+
+                        while (row < maxRowCount && emailCount < 230)
                         {
                             // The zero-based row will not be exceeding the max row count
 
-                            // Get specific row data
-                            data = dataList[row];
-
                             // Get data from row
+                            ID = Convert.ToInt32(dataList[row]["ID"]);
                             LastName = Convert.ToString(dataList[row]["LastName"]);
                             Email = Convert.ToString(dataList[row]["Email"]);
                             AccountType = Convert.ToInt32(dataList[row]["AccountType"]);
@@ -199,46 +208,54 @@ namespace detailwindow.api
                             SpecialsOptOut = Convert.ToBoolean(dataList[row]["SpecialsOptOut"]);
                             PromoSent = Convert.ToDateTime(dataList[row]["PromoSent"]);
 
-                            // Is the account is correct and the email address is good?
-                            if ((AccountType == 0 && !String.IsNullOrEmpty(Email)))
+                            // Email permitters
+                            // bool isPromoSentNotMissing = (PromoSent != DateTime.MinValue);
+                            bool isPromoSentBeforeGivenDate = (PromoSent < cutoffDate);
+                            bool isAccountTypeCorrect = (AccountType == 2);
+                            bool isEmailNotMissing = (Email != null && Email != "");
+                            //bool isEmailAddressgood = IsGoodEmailAddress(Email);
+                            bool isEmailAddressgood = true;
+
+                            if (isPromoSentBeforeGivenDate && isAccountTypeCorrect && isEmailNotMissing && isEmailAddressgood)
                             {
+                                // ***********************************************************************************
                                 // The account is correct and the email address is good
-                                count++;
-                                Message = String.Concat("Email ", count.ToString(), " sent to ", Email);
+                                // Send(strSubject, strBody, Email);
 
-                                // *************************************
-                                Send(strSubject, strBody, Email);
+                                emailCount++;
 
-                                // Is this the last zero-based row?
-                                if (row + 1 >= maxRowCount)
-                                {
-                                    // The end of the list has been reached
-                                    // Append the message to flag the javascript to bail out
-                                    Message = String.Concat(Message, " **Done**");
-                                }
+                                // Update database
+                                UpdateCustomerRecord(ID, "Sent");
 
                                 // Advance the row counter
                                 row++;
+
+                                // Break out of the while loop
+                                break;
                             }
                             else
                             {
-                                // The account is incorrect or the email address is missing
+                                // The account is incorrect or the email address is no good or missing
+                                // Update database
+                                // UpdateCustomerRecord(Email, "Not sent");
+
                                 // Advance to the next row
                                 row++;
-                                goto Loop;
                             }
                         }
-                        else
+
+                        // Build message
+                        Message = String.Concat("Email ", emailCount.ToString(), " sent to ", Email);
+
+                        // Is this the last zero-based row?
+                        if (row >= maxRowCount)
                         {
-                            // We left the loop because the end of the list has been reached
+                            // The end of the list has been reached
                             // Append the message to flag the javascript to bail out
-                            Message = String.Concat(Message, "**Done**");
+                            Message = String.Concat(Message, " **Done**");
                         }
-
-
-
-                        // *********************************************************************************************************
                     }
+
                     else
                     {
                         // Live Reminder email (automated call)
@@ -261,6 +278,7 @@ namespace detailwindow.api
 
             // Prepare return message & notify webmaster
             List<string> returnMessage = new List<string>();
+
             if (Type == "Reminder")
             {
                 // Send confirmation email to webmaster
@@ -268,33 +286,29 @@ namespace detailwindow.api
             }
             else
             {
-                string Row = row.ToString();
-                string Count = count.ToString();
                 returnMessage.Add(Message);
-                returnMessage.Add(Row);
-                returnMessage.Add(Count);
 
+                // This is a promo cycle
                 if (Message.IndexOf("**Done**") > -1)
                 {
                     // Send confirmation email to webmaster
                     Send(Message, strBody, ConfigurationManager.AppSettings["MailToWebmaster"]);
                 }
+                else
+                {
+                    // Send message to repeat
+                    string Row = row.ToString();
+                    string Count = emailCount.ToString();
+                    returnMessage.Add(Row);
+                    returnMessage.Add(Count);
+                }
             }
             return returnMessage;
         }
-        
+
         private void Send(string subject, string strBody, string emailAddress)
         {
-            //LinkedResource logo = new LinkedResource(Server.MapPath(".") + @"\detailLogoMini.gif", MediaTypeNames.Image.Gif);
-            //logo.ContentId = "image1";
-            //logo.ContentType.Name = "detailLogoMini.gif";
-            //logo.TransferEncoding = System.Net.Mime.TransferEncoding.Base64;
-
-            //AlternateView av1 = AlternateView.CreateAlternateViewFromString(strBody, null, MediaTypeNames.Text.Html);
-            //av1.LinkedResources.Add(logo);
-
             MailMessage mail = new MailMessage();
-            //mail.AlternateViews.Add(av1);
             mail.Body = strBody;
             mail.IsBodyHtml = true;
             mail.From = new MailAddress(ConfigurationManager.AppSettings["MailFrom"], "Detail Window Cleaning");
@@ -349,6 +363,62 @@ namespace detailwindow.api
             }
 
             return reminderDataList;
+        }
+
+        private bool IsGoodEmailAddress(string emailAddrUnderTest)
+        {
+            TcpClient tClient = new TcpClient("gmail-smtp-in.l.google.com", 25);
+            string CRLF = "\r\n";
+            byte[] dataBuffer;
+            string responseString;
+            NetworkStream netStream = tClient.GetStream();
+            StreamReader reader = new StreamReader(netStream);
+            responseString = reader.ReadLine();
+
+            /* Perform HELO to SMTP Server and get Response */
+            dataBuffer = Encoding.ASCII.GetBytes("HELO KirtanHere" + CRLF);
+            netStream.Write(dataBuffer, 0, dataBuffer.Length);
+            responseString = reader.ReadLine();
+            dataBuffer = Encoding.ASCII.GetBytes(String.Concat("MAIL FROM:<", emailAddrUnderTest, ">", CRLF));
+            netStream.Write(dataBuffer, 0, dataBuffer.Length);
+            responseString = reader.ReadLine();
+
+            /* Read Response of the RCPT TO Message to know from google if it exist or not */
+            dataBuffer = Encoding.ASCII.GetBytes("RCPT TO:<senderemail@domainname.com>" + CRLF);
+            netStream.Write(dataBuffer, 0, dataBuffer.Length);
+            responseString = reader.ReadLine();
+
+            /* QUITE CONNECTION */
+            dataBuffer = Encoding.ASCII.GetBytes("QUITE" + CRLF);
+            netStream.Write(dataBuffer, 0, dataBuffer.Length);
+            tClient.Close();
+
+            if (GetResponseCode(responseString) == 550)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private int GetResponseCode(string ResponseString)
+        {
+            return int.Parse(ResponseString.Substring(0, 3));
+        }
+
+        private void UpdateCustomerRecord(long ID, string status)
+        {
+            OleDbConnection _objConnection = new OleDbConnection(ConfigurationManager.AppSettings["ConnectString"]);
+            string strSQL = String.Concat("UPDATE Customer SET PromoSent = '", DateTime.Now.ToShortDateString(), "', SentStatus = '", status, "' WHERE ID = ", ID);
+            OleDbCommand objCommand = new OleDbCommand(strSQL, _objConnection);
+            using (_objConnection)
+            {
+                _objConnection.Open();
+                objCommand.ExecuteNonQuery();
+                _objConnection.Close();
+            }
         }
 
     }
