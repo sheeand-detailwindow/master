@@ -341,7 +341,7 @@ namespace detailwindow.api
                     client.Credentials = credComcast;
                     break;
 
-                case "smtpout.secureserver.net":
+                case "relay-hosting.secureserver.net":
                     client.Port = 25;
                     client.UseDefaultCredentials = false;
                     client.Credentials = credGoDaddy;
