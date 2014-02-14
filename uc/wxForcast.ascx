@@ -2,7 +2,8 @@
 
 <div id="wxForcastPanel">
 </div>
-<div ID="wxExtendedPanel" runat="server">
+<div id="wxExtendedPanel">
+<div id="WxExtendedPanel" runat="server">
 <div style="font-size:12px;">For your scheduling convenience,<br />
 here's your local daytime forecast:<br /></div>
 <p><asp:Label ID="lblFirstDayPeriod" runat="server"></asp:Label>
@@ -26,4 +27,4 @@ Precip: <asp:Label ID="lblForthDayPrecip" runat="server"></asp:Label>&#037; chan
 High: <asp:Label ID="lblFifthDayTemp" runat="server"></asp:Label>&nbsp;degrees<br />
 Precip: <asp:Label ID="lblFifthDayPrecip" runat="server"></asp:Label>&#037; chance<br /></p>
 </div>
-
+</div>

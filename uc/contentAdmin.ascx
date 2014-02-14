@@ -391,7 +391,7 @@ THINGS YOU CAN DO:<br />
         var postData = {
             Type: type,
             Rendition: rendition,
-            Row: "1",
+            Row: "0",
             Count: "0",
             CutoffDate: date
     }

@@ -13,13 +13,13 @@ namespace detailwindow.uc {
     public partial class wxForcast {
         
         /// <summary>
-        /// wxExtendedPanel control.
+        /// WxExtendedPanel control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl wxExtendedPanel;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl WxExtendedPanel;
         
         /// <summary>
         /// lblFirstDayPeriod control.

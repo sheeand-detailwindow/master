@@ -349,7 +349,7 @@ namespace detailwindow.uc
                 catch
                 {
                     // WX is out of service
-                    wxExtendedPanel.Visible = false;
+                    WxExtendedPanel.Visible = false;
                 }
             }
         }

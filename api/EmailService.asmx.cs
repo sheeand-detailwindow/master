@@ -151,7 +151,7 @@ namespace detailwindow.api
             string strBody = "";
 
             // Declare return message
-            string Message = "Email sent";
+            string Message = "";
 
             // Compose email
             switch (Type)
@@ -218,16 +218,20 @@ namespace detailwindow.api
 
                             if (isPromoSentBeforeGivenDate && isAccountTypeCorrect && isEmailNotMissing && isEmailAddressgood)
                             {
-                                // ***********************************************************************************
-                                // The account is correct and the email address is good
-                                // Send(strSubject, strBody, Email);
+                                //********************************************************//
+                                // The account is correct and the email address is good   //
+                                //                                                        //
+                                //********************************************************//
 
+                                Send(strSubject, strBody, Email);
+
+                                // Add 1 to the email count
                                 emailCount++;
 
                                 // Update database
                                 UpdateCustomerRecord(ID, "Sent");
 
-                                // Advance the row counter
+                                // Advance the row counter to the next row
                                 row++;
 
                                 // Break out of the while loop
@@ -239,13 +243,20 @@ namespace detailwindow.api
                                 // Update database
                                 // UpdateCustomerRecord(Email, "Not sent");
 
-                                // Advance to the next row
+                                // Advance row counter to the next row
                                 row++;
                             }
                         }
 
                         // Build message
-                        Message = String.Concat("Email ", emailCount.ToString(), " sent to ", Email);
+                        if (emailCount > 0)
+                        {
+                            Message = String.Concat("Email ", emailCount.ToString(), " sent to ", Email);
+                        }
+                        else
+                        {
+                            Message = "No emails sent ";
+                        }
 
                         // Is this the last zero-based row?
                         if (row >= maxRowCount)
@@ -261,7 +272,9 @@ namespace detailwindow.api
                         // Live Reminder email (automated call)
 
                         // ************************************
-                        //Send(strSubject, strBody, Email);
+                        Send(strSubject, strBody, Email);
+
+                        Message = "Email sent";
 
                     }
 
@@ -281,6 +294,7 @@ namespace detailwindow.api
 
             if (Type == "Reminder")
             {
+
                 // Send confirmation email to webmaster
                 Send(String.Concat("Reminder Sent To ", Email), strBody, ConfigurationManager.AppSettings["MailToWebmaster"]);
             }
