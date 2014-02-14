@@ -211,7 +211,7 @@ namespace detailwindow.api
                             // Email permitters
                             // bool isPromoSentNotMissing = (PromoSent != DateTime.MinValue);
                             bool isPromoSentBeforeGivenDate = (PromoSent < cutoffDate);
-                            bool isAccountTypeCorrect = (AccountType == 2);
+                            bool isAccountTypeCorrect = (AccountType < 2);
                             bool isEmailNotMissing = (Email != null && Email != "");
                             //bool isEmailAddressgood = IsGoodEmailAddress(Email);
                             bool isEmailAddressgood = true;
