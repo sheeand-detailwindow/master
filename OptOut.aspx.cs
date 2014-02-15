@@ -19,11 +19,13 @@ namespace detailwindow
         private string Hash = "P@@Sw0rd";
         private string SaltKey = "S@LT&KEY";
         private string VIKey = "@1B2c3D4e5F6g7H8";
-        
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            string id = "";
-            id = Request.QueryString["ID"];
+            string id = Request.QueryString["e"];
+            string t = Request.QueryString["t"];
+            string type = "";
+
             if (String.IsNullOrEmpty(id))
             {
                 Response.Redirect("Default.aspx");
@@ -37,12 +39,22 @@ namespace detailwindow
                 {
                     objConnection.Open();
 
-                    // Get a total count of customers
-                    strSQL = String.Concat("UPDATE CUSTOMER SET [ReminderOptOut] = TRUE WHERE ID = ", id);
+                    switch (t)
+                    {
+                        case "p":
+                            strSQL = String.Concat("UPDATE CUSTOMER SET [SpecialsOptOut] = TRUE WHERE ID = ", id);
+                            lblType.Text = type = "promotional";
+                            break;
+                        case "r":
+                            strSQL = String.Concat("UPDATE CUSTOMER SET [ReminderOptOut] = TRUE WHERE ID = ", id);
+                            lblType.Text = type = "reminder";
+                            break;
+                    }
+
                     OleDbCommand objCommand = new OleDbCommand(strSQL, objConnection);
                     objCommand.ExecuteNonQuery();
 
-                    SendEmailToWebMaster(id);
+                    SendEmailToWebMaster(id, type);
                 }
                 catch (Exception ex)
                 {
@@ -56,9 +68,9 @@ namespace detailwindow
             }
         }
 
-        private void SendEmailToWebMaster(string id)
+        private void SendEmailToWebMaster(string id, string type)
         {
-            string strBody = String.Concat("Client ", id, " has opted out.");
+            string strBody = String.Concat("Client ", id, " has opted out of ", type, " emails.");
             MailMessage mail = new MailMessage();
             mail.Body = strBody;
             mail.From = new MailAddress(ConfigurationManager.AppSettings["MailFrom"], "Detail Window Cleaning");

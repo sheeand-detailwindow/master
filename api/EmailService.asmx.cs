@@ -15,6 +15,7 @@ using System.Web.Caching;
 using System.Net.Sockets;
 using System.IO;
 using System.Text;
+using System.Security.Cryptography;
 
 
 namespace detailwindow.api
@@ -31,6 +32,8 @@ namespace detailwindow.api
     public class EmailService : System.Web.Services.WebService
     {
         OleDbConnection _objConnection = new OleDbConnection(ConfigurationManager.AppSettings["ConnectString"]);
+
+        #region WEB METHODS
 
         [WebMethod(Description = "Loads cache object from database. This method is asynchroniously called upon requesting admin.aspx")]
         public void LoadCustomerCache()
@@ -63,12 +66,6 @@ namespace detailwindow.api
             Context.Cache.Insert("Data", dataList, null, DateTime.Now.AddHours(1), Cache.NoSlidingExpiration);
         }
 
-        private object DbNullCleaner(object obj)
-        {
-            if (obj == DBNull.Value) obj = null;
-            return obj;
-        }
-
         [WebMethod(Description = "This service has several uses, depending on the parameters given. For testing purposes, enter 'Reminder' for Type, 'WebmasterTest' for Rendition, and '1' for Row. This will send a test email to the webmaster.")]
         public List<string> SendEmail(string Type, string Rendition, string Row, string Count, string CutoffDate)
         {
@@ -90,7 +87,6 @@ namespace detailwindow.api
 
             if (Type == "Reminder")
             {
-                // Reminder ????????????????????????????????? CONSIDER PUTTING THIS STUFF NEAR LINE 262   ?????????????????????????????????????
                 // Get specific row
                 List<Dictionary<string, object>> reminderDataList = GetReminderDataList(dataList);
 
@@ -118,6 +114,9 @@ namespace detailwindow.api
             return returnMessage;
         }
 
+        #endregion
+
+        #region METHODS
 
         private List<string> EmailRoutine(string Type, string Rendition, int emailCount, int row, int maxRowCount, List<Dictionary<string, object>> dataList, DateTime cutoffDate)
         {
@@ -145,8 +144,9 @@ namespace detailwindow.api
             string strWinterEnd = "</ul></p>";
             string strJuly = "<p style='font-size:16px; font-weight:bold;'>Summer savings on window cleaning&#33<ul style='font-size:12px;'><li>For work completed in July: 10% discount on window cleaning</li></ul></p>";
             string strSchedDiscount = "<p style='font-size:14px;'>Schedule your appointment now&#33;</p><p style='font-size:14px;'>Go to <a href='http://www.detailwindow.com'>www.DetailWindow.com</a> and mention the discount in the comments.<br />Or call (317) 842-5326 and mention the discount to our customer service representative.</p>";
-            string strFooter = "<p><span style='color:#aa0000; font-weight:bold;'>Detail Window Cleaning - RJJK, Inc.</span><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8226 Detail-minded professionals<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8226 Serving greater Indianapolis</p><br /></div>";
-
+            string strFooter = "<p><span style='color:#aa0000; font-weight:bold;'>Detail Window Cleaning - RJJK, Inc.</span><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8226 Detail-minded professionals<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8226 Serving greater Indianapolis</p>";
+            string strPromoOptOut = String.Concat("<p style='font-size:10px;'>To opt out of receiving these promotional emails, <a href='", Path(), "/OptOut.aspx?t=p&e=", Encrypt(ID.ToString()), "'>click here</a>.</p></div>");
+            string strReminderOptOut = String.Concat("<p style='font-size:10px;'>To opt out of receiving these reminder emails, <a href='", Path(), "/OptOut.aspx?t=r&e=", Encrypt(ID.ToString()), "'>click here</a>.</p></div>");
             string strSubject = "";
             string strBody = "";
 
@@ -158,22 +158,22 @@ namespace detailwindow.api
             {
                 case "Reminder":
                     strSubject = "A Friendly Reminder";
-                    strBody = String.Concat(strHeader, strReminder, strSchedNow, strFooter);
+                    strBody = String.Concat(strHeader, strReminder, strSchedNow, strFooter, strReminderOptOut);
                     break;
 
                 case "JanFeb":
                     strSubject = "Winter Discounts!";
-                    strBody = String.Concat(strHeader, strDeepHome, strSchedNow, strWinterStart, strJanFeb, strWinterEnd, strSchedDiscount, strFooter);
+                    strBody = String.Concat(strHeader, strDeepHome, strSchedNow, strWinterStart, strJanFeb, strWinterEnd, strSchedDiscount, strFooter, strPromoOptOut);
                     break;
 
                 case "March":
                     strSubject = "Winter Discounts!";
-                    strBody = String.Concat(strHeader, strDeepHome, strSchedNow, strWinterStart, strMarch, strWinterEnd, strSchedDiscount, strFooter);
+                    strBody = String.Concat(strHeader, strDeepHome, strSchedNow, strWinterStart, strMarch, strWinterEnd, strSchedDiscount, strFooter, strPromoOptOut);
                     break;
 
                 case "July":
                     strSubject = "Summer Savings!";
-                    strBody = String.Concat(strHeader, strJuly, strSchedNow, strFooter);
+                    strBody = String.Concat(strHeader, strJuly, strSchedNow, strFooter, strPromoOptOut);
                     break;
             }
 
@@ -209,14 +209,14 @@ namespace detailwindow.api
                             PromoSent = Convert.ToDateTime(dataList[row]["PromoSent"]);
 
                             // Email permitters
-                            // bool isPromoSentNotMissing = (PromoSent != DateTime.MinValue);
+                            bool hasCustomerNotOptedOut = (!SpecialsOptOut);
                             bool isPromoSentBeforeGivenDate = (PromoSent < cutoffDate);
                             bool isAccountTypeCorrect = (AccountType < 2);
                             bool isEmailNotMissing = (Email != null && Email != "");
                             //bool isEmailAddressgood = IsGoodEmailAddress(Email);
                             bool isEmailAddressgood = true;
 
-                            if (isPromoSentBeforeGivenDate && isAccountTypeCorrect && isEmailNotMissing && isEmailAddressgood)
+                            if (hasCustomerNotOptedOut && isPromoSentBeforeGivenDate && isAccountTypeCorrect && isEmailNotMissing && isEmailAddressgood)
                             {
                                 //********************************************************//
                                 // The account is correct and the email address is good   //
@@ -259,7 +259,7 @@ namespace detailwindow.api
                         }
 
                         // Is this the last zero-based row?
-                        if (row >= maxRowCount)
+                        if (row >= maxRowCount || emailCount >= 230)
                         {
                             // The end of the list has been reached
                             // Append the message to flag the javascript to bail out
@@ -318,6 +318,12 @@ namespace detailwindow.api
                 }
             }
             return returnMessage;
+        }
+
+        private string Path()
+        {
+            string path = String.Concat("http://", HttpContext.Current.Request.Url.Authority);
+            return path;
         }
 
         private void Send(string subject, string strBody, string emailAddress)
@@ -435,6 +441,41 @@ namespace detailwindow.api
             }
         }
 
+        private object DbNullCleaner(object obj)
+        {
+            if (obj == DBNull.Value) obj = null;
+            return obj;
+        }
+
+        private static string Encrypt(string plainText)
+		{
+            string Hash = "P@@Sw0rd";
+            string SaltKey = "S@LT&KEY";
+            string VIKey = "@1B2c3D4e5F6g7H8";
+
+			byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+
+			byte[] keyBytes = new Rfc2898DeriveBytes(Hash, Encoding.ASCII.GetBytes(SaltKey)).GetBytes(256 / 8);
+			var symmetricKey = new RijndaelManaged() { Mode = CipherMode.CBC, Padding = PaddingMode.Zeros };
+			var encryptor = symmetricKey.CreateEncryptor(keyBytes, Encoding.ASCII.GetBytes(VIKey));
+			
+			byte[] cipherTextBytes;
+
+			using (var memoryStream = new MemoryStream())
+			{
+				using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
+				{
+					cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
+					cryptoStream.FlushFinalBlock();
+					cipherTextBytes = memoryStream.ToArray();
+					cryptoStream.Close();
+				}
+				memoryStream.Close();
+			}
+			return Convert.ToBase64String(cipherTextBytes);
+		}
+
+        #endregion
     }
 
 }
