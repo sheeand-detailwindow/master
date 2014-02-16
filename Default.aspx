@@ -11,7 +11,7 @@
 <head runat="server">
 	<title>Detail Window Cleaning of Indianapolis - Home page</title>
 	<meta name="keywords" content="window cleaning, window washing, Indianapolis, window, clean,
-	wash, housecleaning, house cleaning, windows, squeegee, squilgee, vacuuming, dusting,
+	wash, windows, squeegee, squilgee, vacuuming, dusting,
 	pressure wash, gutter, ceiling fan, wood blind, light fixture, chandelier" />
 	<!-- Google search meta tag -->
     <meta name="google-site-verification" content="fGwnGmCp8Fvd76vEISrD6U3502xGnPtC4yxwKOoUUa4" />

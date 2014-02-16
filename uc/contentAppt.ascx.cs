@@ -132,16 +132,6 @@ namespace detailwindow
                         mail.Body += "- Wood blinds <br />";
                     }
                     _intLine = 134;
-                    if (chkHouseclean.Checked)
-                    {
-                        mail.Body += "- House cleaning services <br />";
-                    }
-                    _intLine = 139;
-                    if (chkDeepClean.Checked)
-                    {
-                        mail.Body += "- Interior deep cleaning <br />";
-                    }
-                    _intLine = 144;
                     mail.Body += "<br /><font style='text-decoration:underline'>Outside</font><br />";
                     _intLine = 146;
                     if (chkOutside.Checked | chkAllWindows.Checked)

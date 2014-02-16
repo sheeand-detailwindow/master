@@ -53,8 +53,7 @@
 </table>
 <table cellspacing="9px" cellpadding="1px" width="450px" border="0px">
 	<tr>
-		<td>
-			<asp:CheckBox id="chkHouseclean" runat="server" Text="House cleaning services"></asp:CheckBox>
+		<td>&nbsp;
         </td>
     </tr>
 	<tr>

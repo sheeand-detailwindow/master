@@ -34,8 +34,6 @@ The company began receiving the Super Service Award back in 1999, and has receiv
 Read how <a href="http://magazine.angieslist.com/house-cleaning/articles/window-cleaning-excellence-is-all-in-the-details.aspx" target="_blank">Window Cleaning Excellence is all in the Details</a>.
 It is noteworthy that less than 5&#037; of the businesses listed on Angie's List receive the Super Service Award.
 </p><br />
-<p><span id="Span3" style="font-weight:bold;">House cleaning</span><br />Professional house cleaning services are also available.  With over 15 years experience cleaning homes of all sizes,
- the company’s conscientious staff caters to our client’s needs with prompt, thorough and reliable service.</p><br />
 </div>
 <br />
 <br />

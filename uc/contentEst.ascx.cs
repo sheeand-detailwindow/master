@@ -121,11 +121,6 @@ namespace detailwindow
                         mail.Body += "- Wood blinds <br />";
                     }
                     _intLine = 121;
-                    if (chkHouseclean.Checked)
-                    {
-                        mail.Body += "- House cleaning services <br />";
-                    }
-                    _intLine = 126;
                     if (chkDeepClean.Checked)
                     {
                         mail.Body += "- Interior deep cleaning <br />";
