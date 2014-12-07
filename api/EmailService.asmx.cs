@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
@@ -31,7 +31,7 @@ namespace detailwindow.api
 
     public class EmailService : System.Web.Services.WebService
     {
-        OleDbConnection _objConnection = new OleDbConnection(ConfigurationManager.AppSettings["ConnectString"]);
+        SqlConnection objConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["detailConnectionString"].ConnectionString);
 
         #region WEB METHODS
 
@@ -39,12 +39,12 @@ namespace detailwindow.api
         public void LoadCustomerCache()
         {
             List<Dictionary<string, object>> dataList = new List<Dictionary<string, object>>();
-            OleDbDataReader objReader = null;
+            SqlDataReader objReader = null;
             string strSQL = "SELECT * FROM Customer";
-            OleDbCommand objCommand = new OleDbCommand(strSQL, _objConnection);
-            using (_objConnection)
+            SqlCommand objCommand = new SqlCommand(strSQL, objConnection);
+            using (objConnection)
             {
-                _objConnection.Open();
+                objConnection.Open();
                 objReader = objCommand.ExecuteReader();
                 while (objReader.Read())
                 {
@@ -61,7 +61,7 @@ namespace detailwindow.api
                     data["PromoSent"] = DbNullCleaner(objReader["PromoSent"]);
                     dataList.Add(data);
                 }
-                _objConnection.Close();
+                objConnection.Close();
             }
             Context.Cache.Insert("Data", dataList, null, DateTime.Now.AddHours(1), Cache.NoSlidingExpiration);
         }
@@ -113,6 +113,14 @@ namespace detailwindow.api
 
             return returnMessage;
         }
+
+        [WebMethod(Description = "This is a test service.")]
+        public string Test(string x)
+        {
+            string message = "This is your server speaking.";
+            return message;
+        }
+
 
         #endregion
 
@@ -430,9 +438,9 @@ namespace detailwindow.api
 
         private void UpdateCustomerRecord(long ID, string status)
         {
-            OleDbConnection _objConnection = new OleDbConnection(ConfigurationManager.AppSettings["ConnectString"]);
+            SqlConnection _objConnection = new SqlConnection(ConfigurationManager.AppSettings["ConnectString"]);
             string strSQL = String.Concat("UPDATE Customer SET PromoSent = '", DateTime.Now.ToShortDateString(), "', SentStatus = '", status, "' WHERE ID = ", ID);
-            OleDbCommand objCommand = new OleDbCommand(strSQL, _objConnection);
+            SqlCommand objCommand = new SqlCommand(strSQL, _objConnection);
             using (_objConnection)
             {
                 _objConnection.Open();

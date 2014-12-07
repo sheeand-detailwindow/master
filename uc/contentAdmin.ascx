@@ -225,7 +225,7 @@ THINGS YOU CAN DO:<br />
     <br />
     <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:detailConnectionString %>"
         ProviderName="<%$ ConnectionStrings:detailConnectionString.ProviderName %>"
-        SelectCommand="SELECT [NextReminder], [Recurrency], [Name], [LastName], [CompanyName], [Subdivision], [Address], [City], [Zip], [Email], [Phone1], [Phone2], [Phone3], [LastLogin], [PromoSent], [ID] FROM [Customer] WHERE [ReminderOptOut] = NULL OR [ReminderOptOut] = FALSE ORDER BY [LastLogin] DESC" 
+        SelectCommand="SELECT [NextReminder], [Recurrency], [Name], [LastName], [CompanyName], [Subdivision], [Address], [City], [Zip], [Email], [Phone1], [Phone2], [Phone3], [LastLogin], [PromoSent], [ID] FROM [Customer] WHERE [ReminderOptOut] = NULL OR [ReminderOptOut] = 0 ORDER BY [LastLogin] DESC" 
         DeleteCommand="DELETE FROM [Customer] WHERE [ID] = ?" 
         UpdateCommand="UPDATE [Customer] SET [NextReminder] = ?, [Recurrency] = ?  WHERE [ID] = ?">
         <DeleteParameters>
@@ -234,7 +234,7 @@ THINGS YOU CAN DO:<br />
     </asp:SqlDataSource>
     <asp:SqlDataSource ID="SqlDataSource2" runat="server" ConnectionString="<%$ ConnectionStrings:detailConnectionString %>"
         ProviderName="<%$ ConnectionStrings:detailConnectionString.ProviderName %>"
-        SelectCommand="SELECT [NextReminder], [Recurrency], [Name], [LastName], [CompanyName], [Subdivision], [Address], [City], [Zip], [Email], [Phone1], [Phone2], [Phone3], [LastLogin], [PromoSent], [ID] FROM [Customer] WHERE [ReminderOptOut] = TRUE ORDER BY [LastLogin] DESC" 
+        SelectCommand="SELECT [NextReminder], [Recurrency], [Name], [LastName], [CompanyName], [Subdivision], [Address], [City], [Zip], [Email], [Phone1], [Phone2], [Phone3], [LastLogin], [PromoSent], [ID] FROM [Customer] WHERE [ReminderOptOut] = 1 ORDER BY [LastLogin] DESC" 
         DeleteCommand="DELETE FROM [Customer] WHERE [ID] = ?" >
         <DeleteParameters>
             <asp:Parameter Name="ID" Type="Int32" />

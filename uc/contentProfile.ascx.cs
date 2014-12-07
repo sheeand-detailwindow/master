@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Configuration;
 using System.Data;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.Security;
@@ -64,7 +64,7 @@ namespace detailwindow
 
                 // Use ConfigurationManager for localhost
                 // Use WebConfigurationManager for remote host
-                OleDbConnection objConnection = new OleDbConnection(ConfigurationManager.AppSettings["ConnectString"]);
+                SqlConnection objConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["detailConnectionString"].ConnectionString);
 
                 try
                 {
@@ -92,7 +92,7 @@ namespace detailwindow
                         " WHERE ID=@ID";
 
                     //  Declare and create the command object.
-                    OleDbCommand objCommand = new OleDbCommand(strSQL, objConnection);
+                    SqlCommand objCommand = new SqlCommand(strSQL, objConnection);
                     objCommand.Parameters.AddWithValue("@ID", intID);
 
                     // Execute the UPDATE
@@ -145,10 +145,10 @@ namespace detailwindow
             // Declare the connection
             // Use ConfigurationManager for localhost
             // Use WebConfigurationManager for remote host
-            OleDbConnection objConnection = new OleDbConnection(ConfigurationManager.AppSettings["ConnectString"]);
+            SqlConnection objConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["detailConnectionString"].ConnectionString);
 
             // Declare a null SqlDataReader.
-            OleDbDataReader objReader = null;
+            SqlDataReader objReader = null;
 
             try
             {
@@ -159,7 +159,7 @@ namespace detailwindow
                 objConnection.Open();
 
                 // Declare and create the command object
-                OleDbCommand objCommand = new OleDbCommand("SELECT * FROM Customer WHERE ID=@ID", objConnection);
+                SqlCommand objCommand = new SqlCommand("SELECT * FROM Customer WHERE ID=@ID", objConnection);
                 objCommand.Parameters.AddWithValue("@ID", intID);
 
                 // Get a recordset.

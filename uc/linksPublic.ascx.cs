@@ -3,7 +3,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Configuration;
 using System.Data;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Security.Principal;
 using System.Web;
 using System.Web.SessionState;
@@ -61,10 +61,10 @@ namespace detailwindow
                         {
                             // Populate the session variables.
                             // Declare the connection
-                            OleDbConnection objConnection = new OleDbConnection(ConfigurationManager.AppSettings["ConnectString"]);
+                            SqlConnection objConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["detailConnectionString"].ConnectionString);
 
                             // Declare a null SqlDataReader.
-                            OleDbDataReader objReader = null;
+                            SqlDataReader objReader = null;
 
                             try
                             {
@@ -74,7 +74,7 @@ namespace detailwindow
                                 // Fill session objects:
                                 // Declare and create the command object
                                 // SELECT the database data that relates to the UserName cookie value
-                                OleDbCommand objCommand = new OleDbCommand("SELECT ID, Name, LastName, AccountType FROM Customer WHERE UserName='" + strUserName + "'", objConnection);
+                                SqlCommand objCommand = new SqlCommand("SELECT ID, Name, LastName, AccountType FROM Customer WHERE UserName='" + strUserName + "'", objConnection);
 
                                 // Get a recordset.
                                 objReader = objCommand.ExecuteReader();
@@ -129,7 +129,7 @@ namespace detailwindow
                                 "' WHERE ID=@ID";
 
                                 //  Declare and create the command object.
-                                OleDbCommand objCommand = new OleDbCommand(strSQL, objConnection);
+                                SqlCommand objCommand = new SqlCommand(strSQL, objConnection);
                                 objCommand.Parameters.AddWithValue("@ID", intID);
 
                                 // Execute the UPDATE

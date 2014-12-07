@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -20,10 +20,10 @@ namespace detailwindow.uc
         protected void btnVerify_Click(object sender, EventArgs e)
         {
             // Create the connection object.
-            OleDbConnection objConnection = new OleDbConnection(ConfigurationManager.AppSettings["ConnectString"]);
+            SqlConnection objConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["detailConnectionString"].ConnectionString);
 
             // Declare a null SqlDataReader.
-            OleDbDataReader objReader = null;
+            SqlDataReader objReader = null;
 
             // Open the connection.
             objConnection.Open();
@@ -36,7 +36,7 @@ namespace detailwindow.uc
 
 
             //  Declare and create the command object.
-            OleDbCommand objCommand = new OleDbCommand(strSQL, objConnection);
+            SqlCommand objCommand = new SqlCommand(strSQL, objConnection);
             objCommand.Parameters.AddWithValue("@NAME", strFirstName);
             objCommand.Parameters.AddWithValue("@LASTNAME", strLastName);
             objCommand.Parameters.AddWithValue("@ZIP", strZIP);

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Configuration;
 using System.Data;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Web;
 using System.Web.Security;
 using System.Web.UI;
@@ -25,10 +25,10 @@ namespace detailwindow
         protected void btnSubmit_Click(object sender, System.EventArgs e)
         {
             // Declare the connection
-            OleDbConnection objConnection = new OleDbConnection(ConfigurationManager.AppSettings["ConnectString"]);
+            SqlConnection objConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["detailConnectionString"].ConnectionString);
 
             // Declare a null SqlDataReader.
-            OleDbDataReader objReader = null;
+            SqlDataReader objReader = null;
 
             try
             {
@@ -39,7 +39,7 @@ namespace detailwindow
                 objConnection.Open();
 
                 // Declare and create the command object
-                OleDbCommand objCommand = new OleDbCommand("SELECT * FROM Customer WHERE ID=@ID", objConnection);
+                SqlCommand objCommand = new SqlCommand("SELECT * FROM Customer WHERE ID=@ID", objConnection);
                 objCommand.Parameters.AddWithValue("@ID", intID);
 
                 // Get a recordset.

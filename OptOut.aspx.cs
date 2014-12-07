@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -33,7 +33,7 @@ namespace detailwindow
             else
             {
                 id = Decrypt(id);
-                OleDbConnection objConnection = new OleDbConnection(ConfigurationManager.AppSettings["ConnectString"]);
+                SqlConnection objConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["detailConnectionString"].ConnectionString);
                 string strSQL = "";
                 try
                 {
@@ -51,7 +51,7 @@ namespace detailwindow
                             break;
                     }
 
-                    OleDbCommand objCommand = new OleDbCommand(strSQL, objConnection);
+                    SqlCommand objCommand = new SqlCommand(strSQL, objConnection);
                     objCommand.ExecuteNonQuery();
 
                     SendEmailToWebMaster(id, type);
