@@ -7,7 +7,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head runat="server">
-	<title>Detail Window Cleaning - Administrator page</title>
+	<title>Detail Window Cleaning - Administrator Page</title>
 	<link href="admin.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 </head>
