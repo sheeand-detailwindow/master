@@ -226,8 +226,8 @@ THINGS YOU CAN DO:<br />
     <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:detailConnectionString %>"
         ProviderName="<%$ ConnectionStrings:detailConnectionString.ProviderName %>"
         SelectCommand="SELECT [NextReminder], [Recurrency], [Name], [LastName], [CompanyName], [Subdivision], [Address], [City], [Zip], [Email], [Phone1], [Phone2], [Phone3], [LastLogin], [PromoSent], [ID] FROM [Customer] WHERE [ReminderOptOut] = NULL OR [ReminderOptOut] = 0 ORDER BY [LastLogin] DESC" 
-        DeleteCommand="DELETE FROM [Customer] WHERE [ID] = ?" 
-        UpdateCommand="UPDATE [Customer] SET [NextReminder] = ?, [Recurrency] = ?  WHERE [ID] = ?">
+        DeleteCommand="DELETE FROM [Customer] WHERE [ID] = @ID" 
+        UpdateCommand="UPDATE [Customer] SET [NextReminder] = @NextReminder, [Recurrency] = ?  WHERE [ID] = @ID">
         <DeleteParameters>
             <asp:Parameter Name="ID" Type="Int32" />
         </DeleteParameters>
@@ -235,7 +235,7 @@ THINGS YOU CAN DO:<br />
     <asp:SqlDataSource ID="SqlDataSource2" runat="server" ConnectionString="<%$ ConnectionStrings:detailConnectionString %>"
         ProviderName="<%$ ConnectionStrings:detailConnectionString.ProviderName %>"
         SelectCommand="SELECT [NextReminder], [Recurrency], [Name], [LastName], [CompanyName], [Subdivision], [Address], [City], [Zip], [Email], [Phone1], [Phone2], [Phone3], [LastLogin], [PromoSent], [ID] FROM [Customer] WHERE [ReminderOptOut] = 1 ORDER BY [LastLogin] DESC" 
-        DeleteCommand="DELETE FROM [Customer] WHERE [ID] = ?" >
+        DeleteCommand="DELETE FROM [Customer] WHERE [ID] = @ID" >
         <DeleteParameters>
             <asp:Parameter Name="ID" Type="Int32" />
             <asp:Parameter Name="ReminderOptOut" Type="Boolean" />
@@ -258,7 +258,7 @@ THINGS YOU CAN DO:<br />
                 <asp:Button ID="Button6" runat="server" OnClick="btnHome_Click" Text="Return to home page" />
             </td>
             <td>
-                Send promo if previous emails were sent before: <input type="text" id="datepicker" name="datepicker">
+                Don't send promo if one was sent on <input type="text" id="datepicker" name="datepicker"> or later.
             </td>
             <td class="auto-style3">
                 <asp:Button ID="Button7" runat="server" commandargument="View1" commandname="SwitchViewByID" Text="Customer List" />
@@ -334,8 +334,11 @@ THINGS YOU CAN DO:<br />
     var path = '<%= Path %>';
 
     function SendEmail(type, rendition) {
-        switch (rendition) {
+        var thisRendition = rendition;
+        switch (thisRendition) {
+
             case 'WebmasterTest':
+
                 switch (type) {
                     case 'Reminder':
                         $("#lblTestReminderEmailToWebmaster").text('Email in progress')
@@ -350,8 +353,11 @@ THINGS YOU CAN DO:<br />
                         $("#lblTestJulyEmailToWebmaster").text('Email in progress')
                         break;
                 }
+
                 break;
+
             case 'AdministratorTest':
+
                 switch (type) {
                     case 'Reminder':
                         $("#lblTestReminderEmailToAdministrator").text('Email in progress')
@@ -366,8 +372,11 @@ THINGS YOU CAN DO:<br />
                         $("#lblTestJulyEmailToAdministrator").text('Email in progress')
                         break;
                 }
+
                 break;
+
             case 'Live':
+
                 var r = confirm("You are about to send hundreds of emails! DO NOT close this browser window until all emails have been sent. Are you sure you want to do this?");
                 if (r == false) { return; }
                 else {
@@ -385,12 +394,14 @@ THINGS YOU CAN DO:<br />
                             $("#lblJulyEmails").text('Email in progress')
                             break;
                     }
+
+                    break;
             }
         }
         var date = $("#datepicker").datepicker("getDate");
         var postData = {
             Type: type,
-            Rendition: rendition,
+            Rendition: thisRendition,
             Row: "0",
             Count: "0",
             CutoffDate: date
@@ -407,9 +418,12 @@ THINGS YOU CAN DO:<br />
                         $("#lblErrorMessage").text(msg)
                     }
                     else {
-                    var msg = obj.d[0];
-                    switch (rendition) {
-                        case 'WebmasterTest':
+                        var msg = obj.d[0];
+
+                        switch (thisRendition) {
+
+                            case 'WebmasterTest':
+
                             switch (type) {
                                 case 'Reminder':
                                     $("#lblTestReminderEmailToWebmaster").text(msg)
@@ -424,23 +438,30 @@ THINGS YOU CAN DO:<br />
                                     $("#lblTestJulyEmailToWebmaster").text(msg)
                                     break;
                             }
+
                             break;
-                        case 'AdministratorTest':
-                            switch (type) {
-                                case 'Reminder':
-                                    $("#lblTestReminderEmailToAdministrator").text(msg)
-                                    break;
-                                case 'JanFeb':
-                                    $("#lblTestJanFebEmailToAdministrator").text(msg)
-                                    break;
-                                case 'March':
-                                    $("#lblTestJanFebEmailToAdministrator").text(msg)
-                                    break;
-                                case 'July':
-                                    $("#lblTestJulyEmailToAdministrator").text(msg)
-                                    break;
-                            }
-                        case 'Live':
+
+                            case 'AdministratorTest':
+
+                                switch (type) {
+                                    case 'Reminder':
+                                        $("#lblTestReminderEmailToAdministrator").text(msg)
+                                        break;
+                                    case 'JanFeb':
+                                        $("#lblTestJanFebEmailToAdministrator").text(msg)
+                                        break;
+                                    case 'March':
+                                        $("#lblTestJanFebEmailToAdministrator").text(msg)
+                                        break;
+                                    case 'July':
+                                        $("#lblTestJulyEmailToAdministrator").text(msg)
+                                        break;
+                                }
+
+                                break;
+
+                            case 'Live':
+
                             switch (type) {
                                 case 'Reminder':
                                     $("#lblReminderEmails").text(msg)
@@ -455,11 +476,13 @@ THINGS YOU CAN DO:<br />
                                     $("#lblJulyEmails").text(msg)
                                     break;
                             }
+
                             if ((obj.d.length == 3) || (msg.indexOf("**Done**") == -1)) {
                                 var row = obj.d[1];
                                 var count = obj.d[2];
-                                SendAnotherEmail(type, rendition, row, count);
+                                SendAnotherEmail(type, thisRendition, row, count);
                             }
+
                             break;
                         }
                     }
@@ -472,10 +495,11 @@ THINGS YOU CAN DO:<br />
     }
 
     function SendAnotherEmail(type, rendition, row, count) {
+        var myRendition = rendition;
         var date = $("#datepicker").datepicker("getDate");
         var postData = {
             Type: type,
-            Rendition: rendition,
+            Rendition: myRendition,
             Row: row,
             Count: count,   
             CutoffDate: date
@@ -507,7 +531,7 @@ THINGS YOU CAN DO:<br />
                         if ((obj.d.length == 3) || (msg.indexOf("**Done**") == -1)) {
                             var row = obj.d[1];
                             var count = obj.d[2];
-                            SendAnotherEmail(type, rendition, row, count);
+                            SendAnotherEmail(type, myRendition, row, count);
                         }
                     }
                 }

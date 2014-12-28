@@ -17,7 +17,6 @@ using System.IO;
 using System.Text;
 using System.Security.Cryptography;
 
-
 namespace detailwindow.api
 {
     /// <summary>
@@ -38,6 +37,7 @@ namespace detailwindow.api
         [WebMethod(Description = "Loads cache object from database. This method is asynchroniously called upon requesting admin.aspx")]
         public void LoadCustomerCache()
         {
+            Context.Cache.Remove("Data");
             List<Dictionary<string, object>> dataList = new List<Dictionary<string, object>>();
             SqlDataReader objReader = null;
             string strSQL = "SELECT * FROM Customer";
@@ -63,7 +63,7 @@ namespace detailwindow.api
                 }
                 objConnection.Close();
             }
-            Context.Cache.Insert("Data", dataList, null, DateTime.Now.AddHours(1), Cache.NoSlidingExpiration);
+            Context.Cache.Insert("Data", dataList, null, DateTime.Now.AddMinutes(30), Cache.NoSlidingExpiration);
         }
 
         [WebMethod(Description = "This service has several uses, depending on the parameters given. For testing purposes, enter 'Reminder' for Type, 'WebmasterTest' for Rendition, and '1' for Row. This will send a test email to the webmaster.")]
@@ -139,20 +139,24 @@ namespace detailwindow.api
             bool ReminderOptOut = Convert.ToBoolean(dataList[row]["ReminderOptOut"]);
             bool SpecialsOptOut = Convert.ToBoolean(dataList[row]["SpecialsOptOut"]);
             DateTime PromoSent = Convert.ToDateTime(dataList[row]["PromoSent"]);
+            string errorMessage = "";
 
             // Declare email components
             //string strHeader = "<img src=\"cid:image1\"/><div style='font-family:Arial, Vernada;font-size:12px;'><br /><br />";
-            string strHeader = "<img src='http://www.detailwindow.com/api/detailLogoMini.png'><div style='font-family:Arial, Vernada;font-size:12px;'><br /><br />";
-            string strReminder = "<p style='font-size:16px; font-weight:bold;'>It's time to have your glass cleaned!<br /></p>";
-            string strDeepHome = "<p style='font-size:16px; font-weight:bold;'>Deep Home Cleaning<br /></p><p style='font-weight:bold;'>Your home will <span style='text-decoration:underline;'>FEEL</span> and <span style='text-decoration:underline;'>SMELL</span> clean&#33;</p><p><ul style='font-size:12px;'><li>Woodwork (baseboards, doors and frames)</li><li>Wood blinds and walls</li><li>Basements and garages</li><li>Under and behind major appliances, heavy furniture, and other hard-to-get places</li><li>Ceiling fans, chandeliers, mirrors, light fixtures, and more!</li></ul></p>";
-            string strSchedNow = "<p style='font-size:14px;'>Schedule your appointment now&#33;</p><p style='font-size:14px;'>Go to <a href='http://www.detailwindow.com'>www.DetailWindow.com</a>.<br />Or, call (317) 842-5326.</p>";
-            string strWinterStart = "<hr><p style='font-size:16px; font-weight:bold;'>Winter discounts on window cleaning&#33<ul style='font-size:14px;'>";
-            string strJanFeb = "<li>For work completed in February: <span style='text-decoration:line-through;'>20%</span> <span style='font-weight:bold;'>NOW 25%</span> discount on window cleaning</li>";
-            string strMarch = "<li>For work completed in March: 15% discount on window cleaning</li>";
-            string strWinterEnd = "</ul></p>";
-            string strJuly = "<p style='font-size:16px; font-weight:bold;'>Summer savings on window cleaning&#33<ul style='font-size:14px;'><li>For work completed in August and September: 10% discount on window cleaning</li></ul></p>";
-            string strSchedDiscount = "<p style='font-size:14px;'>Schedule your appointment now&#33;</p><p style='font-size:14px;'>Go to <a href='http://www.detailwindow.com'>www.DetailWindow.com</a> and mention the discount in the comments.<br />Or call (317) 842-5326 and mention the discount to our customer service representative.</p>";
-            string strFooter = "<p><span style='color:#aa0000; font-weight:bold;'>Detail Window Cleaning - RJJK, Inc.</span><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8226 Detail-minded professionals<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8226 Serving greater Indianapolis</p>";
+            string strHeader = "<body style='background-color: #ffffff;'><img src='http://www.detailwindow.com/api/detailLogoMini.png'><div style='font-family:Arial, Vernada;font-size:12px;'><br /><br />";
+            string strReminder = "<p style='font-size:18px; font-weight:bold; color:#aa0000;'>It's time to have your glass cleaned!<br /></p>";
+            string strDeepHome = "<p style='font-size:18px; font-weight:bold; color:#aa0000;'>Deep Home Cleaning<br />(December 15 to March 15)<br /></p><p style='font-weight:bold;'>Your home will <span style='text-decoration:underline;'>FEEL</span> and <span style='text-decoration:underline;'>SMELL</span> clean&#33;</p><p><ul style='font-size:12px;'><li>Woodwork (baseboards, doors and frames)</li><li>Wood blinds and walls</li><li>Basements and garages</li><li>Under and behind major appliances, heavy furniture, and other hard-to-get places</li><li>Ceiling fans, chandeliers, mirrors, light fixtures, and more!</li></ul></p>";
+            string strSchedNow = "<p style='font-size:14px;'><em>Schedule your appointment now&#33;</em></p><p style='font-size:14px;'>Go to <a href='http://www.detailwindow.com'>www.DetailWindow.com</a>.<br /><br />Or, call (317) 842-5326.</p>";
+            string strWinterStart = "<hr><p style='font-size:18px; font-weight:bold; color:#aa0000;'>Winter discounts on window cleaning&#33</p>";
+            string strJanFeb = "<ul style='font-size:14px;'><li>December 15th to 31st: <span style='font-weight:bold;'>10%</span> discount on window cleaning</li><li>Gift cards are available! Receive a <span style='font-weight:bold;'>$10</span> gift card for every $100 spent.</li>";
+            strJanFeb = String.Concat(strJanFeb, "<li>For work completed in January and February: <span style='font-weight:bold;'>25%</span> discount on window cleaning</li>");
+            strJanFeb = String.Concat(strJanFeb, "<li>For work completed in March: <span style='font-weight:bold;'>15%</span> discount on window cleaning</li></ul>");
+            string strMarch = "";
+            string strWinterEnd = "<p style='font-size:14px;'><em>Schedule your appointment now&#33;</em></p>";
+            string strSnowRemoval = "<hr><p style='font-size:18px; font-weight:bold; color:#aa0000;'>NEW THIS YEAR<br />Personalized snow removal</p><p style='font-size:14px;'>No big truck used, only snowblower and shovel used.<br /><em>Call for free estimate.</em></p>";
+            string strJuly = "<p style='font-size:18px; font-weight:bold; color:#aa0000;'>Summer savings on window cleaning&#33<ul style='font-size:14px;'><li>For work completed in August and September: 10% discount on window cleaning</li></ul></p>";
+            string strSchedDiscount = "<p style='font-size:14px;'>Go to <a href='http://www.detailwindow.com'>www.DetailWindow.com</a><br /><br />Or call (317) 842-5326 and mention the discount to our customer service representative.</p>";
+            string strFooter = "<hr><p><span style='color:#aa0000; font-weight:bold;'>Detail Window Cleaning - RJJK, Inc.</span><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8226 Detail-minded professionals<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8226 Serving greater Indianapolis</p></body>";
             string strPromoOptOut = String.Concat("<p style='font-size:10px;'>To opt out of receiving these promotional emails, <a href='", Path(), "/OptOut.aspx?t=p&e=", Encrypt(ID.ToString()), "'>click here</a>.</p></div>");
             string strReminderOptOut = String.Concat("<p style='font-size:10px;'>To opt out of receiving these reminder emails, <a href='", Path(), "/OptOut.aspx?t=r&e=", Encrypt(ID.ToString()), "'>click here</a>.</p></div>");
             string strSubject = "";
@@ -171,7 +175,7 @@ namespace detailwindow.api
 
                 case "JanFeb":
                     strSubject = "Winter Discounts!";
-                    strBody = String.Concat(strHeader, strDeepHome, strSchedNow, strWinterStart, strJanFeb, strWinterEnd, strSchedDiscount, strFooter, strPromoOptOut);
+                    strBody = String.Concat(strHeader, strDeepHome, strSchedNow, strWinterStart, strJanFeb, strSchedDiscount, strSnowRemoval, strFooter, strPromoOptOut);
                     break;
 
                 case "March":
@@ -183,13 +187,22 @@ namespace detailwindow.api
                     strSubject = "Summer Savings!";
                     strBody = String.Concat(strHeader, strJuly, strSchedNow, strFooter, strPromoOptOut);
                     break;
+
+                default:
+                    break;
             }
 
             switch (Rendition)
             {
                 case "Live":
 
-                    if (Type != "Reminder")
+                        bool hasCustomerNotOptedOut = false;
+                        bool previousPromoSentBeforeGivenDate = false;
+                        bool isAccountTypeCorrect = false;
+                        bool isEmailNotMissing = false;
+                        bool isEmailAddressgood = false;
+
+                        if (Type != "Reminder")
                     {
                         // Promo iteration routine
                         // Test row for 1) proper account type and 2) valid email address (not null or empty)
@@ -201,6 +214,7 @@ namespace detailwindow.api
                         // Max. limit = 230 emails (GoDaddy email account allows 250 referrers per day)
 
                         // while (row < maxRowCount && emailCount < 230)
+
                             while (row < maxRowCount)
                             {
                             // The zero-based row will not be exceeding the max row count
@@ -218,33 +232,41 @@ namespace detailwindow.api
                             PromoSent = Convert.ToDateTime(dataList[row]["PromoSent"]);
 
                             // Email permitters
-                            bool hasCustomerNotOptedOut = (!SpecialsOptOut);
-                            bool isPromoSentBeforeGivenDate = (PromoSent < cutoffDate);
-                            bool isAccountTypeCorrect = (AccountType < 2);
-                            bool isEmailNotMissing = (Email != null && Email != "");
-                            //bool isEmailAddressgood = IsGoodEmailAddress(Email);
-                            bool isEmailAddressgood = true;
+                            hasCustomerNotOptedOut = (!SpecialsOptOut);
+                            previousPromoSentBeforeGivenDate = (PromoSent < cutoffDate);
+                            isAccountTypeCorrect = (AccountType < 2);
+                            isEmailNotMissing = (Email != null && Email != "");
+                            //isEmailAddressgood = IsGoodEmailAddress(Email);
+                            isEmailAddressgood = true;
 
-                            if (hasCustomerNotOptedOut && isPromoSentBeforeGivenDate && isAccountTypeCorrect && isEmailNotMissing && isEmailAddressgood)
+                            if (hasCustomerNotOptedOut && previousPromoSentBeforeGivenDate && isAccountTypeCorrect && isEmailNotMissing && isEmailAddressgood)
                             {
                                 //********************************************************//
                                 // The account is correct and the email address is good   //
                                 //                                                        //
                                 //********************************************************//
 
-                                Send(strSubject, strBody, Email);
+                                errorMessage = Send(strSubject, strBody, Email);
 
-                                // Add 1 to the email count
-                                emailCount++;
+                                if (errorMessage == "")
+                                {
+                                    // Add 1 to the email count
+                                    emailCount++;
 
-                                // Update database
-                                UpdateCustomerRecord(ID, "Sent");
+                                    // Update database
+                                    UpdateCustomerRecord(ID, "Sent");
 
-                                // Advance the row counter to the next row
-                                row++;
+                                    // Advance the row counter to the next row
+                                    row++;
+                                }
+                                else
+                                {
+                                    // do something with errorMessage
+                                }
 
                                 // Break out of the while loop
                                 break;
+
                             }
                             else
                             {
@@ -264,12 +286,13 @@ namespace detailwindow.api
                         }
                         else
                         {
-                            Message = "No emails sent ";
+                            Message = String.Concat("No emails sent. hasCustomerNotOptedOut=", Convert.ToString(hasCustomerNotOptedOut), " previousPromoSentBeforeGivenDate=", Convert.ToString(previousPromoSentBeforeGivenDate), " isAccountTypeCorrect=", Convert.ToString(isAccountTypeCorrect), " isEmailNotMissing=", Convert.ToString(isEmailNotMissing));
                         }
 
-                        // Is this the last zero-based row?
-                        if (row >= maxRowCount || emailCount >= 230)
-                        {
+                        // Is this the last zero-based row, or has the fail safe of 230 been reached?
+                        // if (row >= maxRowCount || emailCount >= 230)
+                        if (row >= maxRowCount || emailCount >= 1000)
+                            {
                             // The end of the list has been reached
                             // Append the message to flag the javascript to bail out
                             Message = String.Concat(Message, " **Done**");
@@ -281,7 +304,7 @@ namespace detailwindow.api
                         // Live Reminder email (automated call)
 
                         // ************************************
-                        Send(strSubject, strBody, Email);
+                        errorMessage = Send(strSubject, strBody, Email);
 
                         Message = "Email sent";
 
@@ -290,11 +313,15 @@ namespace detailwindow.api
                     break;
 
                 case "WebmasterTest":
-                    Send(strSubject, strBody, "sheeand@hotmail.com");
+                    errorMessage = Send(strSubject, strBody, "sheeand@hotmail.com");
                     break;
 
                 case "AdministratorTest":
-                    Send(strSubject, strBody, "janicg61@yahoo.com");
+                    errorMessage = Send(strSubject, strBody, "detailwc@yahoo.com");
+                    //Send(strSubject, strBody, "david52tv@yahoo.com");
+                    break;
+
+                default:
                     break;
             }
 
@@ -303,27 +330,40 @@ namespace detailwindow.api
 
             if (Type == "Reminder")
             {
-
-                // Send confirmation email to webmaster
-                Send(String.Concat("Reminder Sent To ", Email), strBody, ConfigurationManager.AppSettings["MailToWebmaster"]);
-            }
-            else
-            {
-                returnMessage.Add(Message);
-
-                // This is a promo cycle
-                if (Message.IndexOf("**Done**") > -1)
+                if (errorMessage == "")
                 {
                     // Send confirmation email to webmaster
-                    Send(Message, strBody, ConfigurationManager.AppSettings["MailToWebmaster"]);
+                    Send(String.Concat("Reminder Sent To ", Email), strBody, ConfigurationManager.AppSettings["MailToWebmaster"]);
                 }
                 else
                 {
-                    // Send message to repeat
-                    string Row = row.ToString();
-                    string Count = emailCount.ToString();
-                    returnMessage.Add(Row);
-                    returnMessage.Add(Count);
+                    Send(errorMessage, strBody, ConfigurationManager.AppSettings["MailToWebmaster"]);
+                }
+            }
+            else
+            {
+                if (errorMessage == "")
+                {
+                    returnMessage.Add(Message);
+
+                    // This is a promo cycle
+                    if (Message.IndexOf("**Done**") > -1)
+                    {
+                        // Send confirmation email to webmaster
+                        Send(Message, strBody, ConfigurationManager.AppSettings["MailToWebmaster"]);
+                    }
+                    else
+                    {
+                        // Send message to repeat
+                        string Row = row.ToString();
+                        string Count = emailCount.ToString();
+                        returnMessage.Add(Row);
+                        returnMessage.Add(Count);
+                    }
+                }
+                else
+                {
+                    returnMessage.Add(errorMessage);
                 }
             }
             return returnMessage;
@@ -335,7 +375,7 @@ namespace detailwindow.api
             return path;
         }
 
-        private void Send(string subject, string strBody, string emailAddress)
+        private string Send(string subject, string strBody, string emailAddress)
         {
             MailMessage mail = new MailMessage();
             mail.Body = strBody;
@@ -346,37 +386,36 @@ namespace detailwindow.api
 
             SmtpClient client = new SmtpClient();
             client.Host = ConfigurationManager.AppSettings["SmtpServer"];
-            System.Net.NetworkCredential credComcast = new System.Net.NetworkCredential("sheeand", "MSLKQcg");
-            System.Net.NetworkCredential credGoDaddy = new System.Net.NetworkCredential("webmaster@detailwindow.com", "tbitwog1");
-            switch (ConfigurationManager.AppSettings["SmtpServer"])
+            string message = "";
+
+            switch (client.Host)
             {
                 case "smtp.comcast.net":
                     client.Port = 587;
                     client.UseDefaultCredentials = false;
-                    client.Credentials = credComcast;
+                    client.Credentials = new System.Net.NetworkCredential("sheeand", "MSLKQcg");
                     break;
 
                 case "relay-hosting.secureserver.net":
                     client.Port = 25;
                     client.UseDefaultCredentials = false;
-                    client.Credentials = credGoDaddy;
+                    client.Credentials = new System.Net.NetworkCredential("webmaster@detailwindow.com", "tbitwog1");
                     break;
             }
-            using (client)
-            {
+
                 try
                 {
                     client.Send(mail);
                 }
                 catch (Exception ex)
                 {
-                    Session["ErrorCode"] = ex.Message;
+                    message = ex.Message;
                 }
                 finally
                 {
                     client.Dispose();
                 }
-            }
+                return message;
         }
 
         private List<Dictionary<string, object>> GetReminderDataList(List<Dictionary<string, object>> dataList)
@@ -439,14 +478,14 @@ namespace detailwindow.api
 
         private void UpdateCustomerRecord(long ID, string status)
         {
-            SqlConnection _objConnection = new SqlConnection(ConfigurationManager.AppSettings["ConnectString"]);
+            SqlConnection objConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["detailConnectionString"].ConnectionString);
             string strSQL = String.Concat("UPDATE Customer SET PromoSent = '", DateTime.Now.ToShortDateString(), "', SentStatus = '", status, "' WHERE ID = ", ID);
-            SqlCommand objCommand = new SqlCommand(strSQL, _objConnection);
-            using (_objConnection)
+            SqlCommand objCommand = new SqlCommand(strSQL, objConnection);
+            using (objConnection)
             {
-                _objConnection.Open();
+                objConnection.Open();
                 objCommand.ExecuteNonQuery();
-                _objConnection.Close();
+                objConnection.Close();
             }
         }
 
